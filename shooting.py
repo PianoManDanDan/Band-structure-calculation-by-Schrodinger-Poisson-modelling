@@ -22,10 +22,11 @@ x = np.linspace(0, 1, 1001)
 V = np.zeros(len(x))
 
 plt.figure()
-for i in range(1, 5):
-	psi = shooting(x, V, i**2 * np.pi**2/2) 
+for i in range(1, 2):
+	psi = shooting(x, V, 3) 
 	plt.plot(x[::2], -psi[::2])
 	print(max(psi))
+plt.show()
 
 # plt.figure()
 # plt.plot(x, psi) # Gives block
