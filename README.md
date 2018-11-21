@@ -2,7 +2,7 @@
 
 This research project was done as part of my masters year at Cardiff University.
 
-## Dependecies:
+### Dependecies:
 
 - Python 3.6 or later
 - [Numpy Library](http://www.numpy.org/) (v1.15.2 was used in development)
