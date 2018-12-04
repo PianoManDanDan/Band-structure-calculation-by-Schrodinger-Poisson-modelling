@@ -10,7 +10,6 @@ def linearE(n):
 	right = (1.5*np.pi*c*(n-0.25))**(2./3)
 	return left*right / mev
 
-	return
 
 def ParabolicE(n):
 	global hbar, m_e, mev
