@@ -9,7 +9,7 @@ __author__ = 'Daniel Martin'
 __version__ = '0.1'
 
 
-class diffusion:
+class Diffusion:
 
 	def __init__(self):
-		
+		pass

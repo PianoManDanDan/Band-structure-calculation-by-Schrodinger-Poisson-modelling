@@ -1,6 +1,6 @@
-#main.py
-#author: Daniel Martin
-#date created: 10/10/2018
+# main.py
+# author: Daniel Martin
+# date created: 10/10/2018
 
 """
 This script makes use of schrodinger.py, poisson.py and diffusion.py and 
@@ -12,21 +12,21 @@ posson solver and run the necessary calculations.
 __author__ = 'Daniel Martin'
 __version__ = '0.1'
 
-#OTHER STANDARD IMPORTS???
-import tkinter #IS TKINTER THE CORRECT ONE? OR IS ANOTHER BETTER???
+# Imports
+import tkinter
 
-from schrodinger import schrodinger
-from poisson import poisson #NOT WORKING YET
-from diffusion import diffusion #NOT WORKING YET
+import numpy as np
+import matplotlib.pyplot as plt
 
+from schrodinger import Schrodinger
+from poisson import Poisson  # NOT WORKING YET
+from diffusion import Diffusion  # NOT WORKING YET
 
 
 def main():
-	#Main function to run.
+    # Main function to run.
+    pass
 
 
-
-
-
-if __name__ = '__main__':
-	main()
+if __name__ == '__main__':
+    main()
