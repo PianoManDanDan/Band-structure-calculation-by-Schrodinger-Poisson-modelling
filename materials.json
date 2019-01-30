@@ -1,8 +1,8 @@
 {
 	"__comment__" : {
-		"me": "Effective mass of electron",
-		"mhh": "Effective mass of heavy hole",
-		"mlh": "Effective mass of light hole",
+		"me": "Effective mass of electron (kg)",
+		"mhh": "Effective mass of heavy hole (kg)",
+		"mlh": "Effective mass of light hole (kg)",
 		"Eg": "Band Gap of material at 300K (eV)",
 
 		"Data From" : "http://www.ioffe.ru/SVA/NSM/Semicond/",
