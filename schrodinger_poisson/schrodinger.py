@@ -10,7 +10,7 @@ domain, x.
 __version__ = '0.1'
 __author__ = 'Daniel Martin'
 __all__ = ['_beta', '_M', 'energy_eigenvalues',
-        'wavefunctions', 'solve_schrodinger']
+           'wavefunctions', 'solve_schrodinger']
 
 import numpy as np
 from numpy import linalg as LA
@@ -38,9 +38,9 @@ def _beta(x, V, m, hbar):
           array of beta values to go into calculating M
     """
 
-    dx = abs(x[1]-x[0])
+    dx = abs(x[1] - x[0])
 
-    return 2.0 + (2*(dx**2)*m / hbar**2)*V
+    return 2.0 + (2 * (dx ** 2) * m / hbar ** 2) * V
 
 
 def _M(x, V, m, hbar):
@@ -67,12 +67,12 @@ def _M(x, V, m, hbar):
     """
 
     N = len(x)
-    dx = abs(x[1]-x[0])
+    dx = abs(x[1] - x[0])
 
     beta = _beta(x, V, m, hbar)
     M = np.diagflat(beta) - np.eye(N, k=1) - np.eye(N, k=-1)
 
-    return M * hbar**2 / (2.0 * m * dx**2)
+    return M * hbar ** 2 / (2.0 * m * dx ** 2)
 
 
 def energy_eigenvalues(x, V, m=constants.m_e, hbar=constants.hbar):
@@ -139,8 +139,8 @@ def wavefunctions(x, V, m=constants.m_e, hbar=constants.hbar):
     _, eigenvectors = LA.eigh(M, UPLO='U')
 
     for i in range(len(x)):
-        if eigenvectors[0,i] > eigenvectors[1,i]:
-            eigenvectors[:,i] *= -1
+        if eigenvectors[0, i] > eigenvectors[1, i]:
+            eigenvectors[:, i] *= -1
 
     return eigenvectors
 
@@ -179,16 +179,16 @@ def solve_schrodinger(x, V, m=constants.m_e, hbar=constants.hbar):
     eigenvalues, eigenvectors = LA.eigh(M, UPLO='U')
 
     for i in range(len(x)):
-        if eigenvectors[0,i] > eigenvectors[1,i]:
-            eigenvectors[:,i] *= -1
+        if eigenvectors[0, i] > eigenvectors[1, i]:
+            eigenvectors[:, i] *= -1
 
     return eigenvalues, eigenvectors
 
 
-
-
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
     x = np.linspace(-1e-8, 1e-8, 1000)
-    V = np.zeros_like(x) 
+    V = np.zeros_like(x)
+
 
     eigval, eigvect = solve_schrodinger(x, V)

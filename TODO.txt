@@ -1,0 +1,36 @@
+=======================================================================
+GENERAL
+=======================================================================
+- Create default potential profile .csv files
+	- Is .csv best?
+	- Infinite square
+	- Parabolic (how wide/tall)?
+	- Finite Square (50nm wide, 200eV tall)?
+
+
+=======================================================================
+main.py
+=======================================================================
+- Create and 'design' application window.
+- Create dropdown menus for potential. Allow own file options.
+- Import JSON and import material values.
+
+
+=======================================================================
+schrodinger_poisson/__init__.py
+=======================================================================
+- In __init__.py, from <module_name> import <function> doesn't work. 
+	- Why doesn't it like importing? Module is in same folder.
+	- In main.py, cannot write:
+		>>> from schrodinger_poisson import <f>
+	- Work out how to get __init__.py import working properly.
+
+
+
+=======================================================================
+materials.json
+=======================================================================
+- Add more materials to materials.json
+
+
+
