@@ -14,6 +14,7 @@ main.py
 - Create and 'design' application window.
 - Create dropdown menus for potential. Allow own file options.
 - Import JSON and import material values.
+- Add to go() function when ready.
 
 
 =======================================================================

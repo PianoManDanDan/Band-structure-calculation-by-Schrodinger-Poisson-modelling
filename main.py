@@ -21,6 +21,8 @@ import matplotlib.pyplot as plt
 from schrodinger_poisson.schrodinger import solve_schrodinger
 # from schrodinger_poisson.poisson import solve_poisson
 # from schrodinger_poisson.diffusion import solve_diffusion
+# from schrodinger_poisson import schrodinger_poisson as SP
+
 
 def create_window():
     """creates application window and contains all window functionality"""
@@ -30,6 +32,13 @@ def create_window():
         root.destroy()
         create_window()
         return
+
+    def go():
+        """Functionality for GO button in tkinter window"""
+        # JSON material variables
+        # x, V = file.open(path, unpack=True)
+        N = N_states.get()
+        print(N)
 
     # Window setup
     root = tk.Tk()
@@ -46,14 +55,20 @@ def create_window():
     file_menu.add_separator()
     file_menu.add_command(label='Exit', command=root.destroy)
 
+    # Left side options
 
+    # N states to find
+    N_states = tk.Spinbox(root, from_=1, to=10)  # Is 10 enough?
+    N_states.pack()
 
+    go_button = tk.Button(root, command=go, text='GO!')
+    go_button.pack()
 
+    # embedded matplotlib window
 
 
     # Run window indefinitely
     root.mainloop()
-
 
 
 def main():
