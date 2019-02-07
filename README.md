@@ -48,6 +48,7 @@ np.savetxt('potential.csv', potential_profile, delimiter=',')
 
 ```
 
-> [!IMPORTANT]
-> The number of spatial points must be the same as the number of points in the potential.
+<aside class="warning">
+The number of spatial points must be the same as the number of points in the potential.
+</aside>
 
