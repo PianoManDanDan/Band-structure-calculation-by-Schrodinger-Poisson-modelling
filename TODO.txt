@@ -13,12 +13,15 @@ main.py
 =======================================================================
 - Create and 'design' application window.
 - Create dropdown menus for potential. Allow own file options.
+	- Dropdown or just file select?
 - Import JSON and import material values.
 - Add to go() function when ready.
+- Remove main() function and just have Window() in if __name__=='__main__' ?
+- Get material selection working
 
 
 =======================================================================
-schrodinger_poisson/__init__.py
+./schrodinger_poisson/__init__.py
 =======================================================================
 - Is __all__ variable correct?
 - Possibly remove " from schrodinger_poisson import * "	and replace 
@@ -28,9 +31,9 @@ schrodinger_poisson/__init__.py
 
 
 =======================================================================
-materials.json
+./materials/
 =======================================================================
-- Add more materials to materials.json
+- Add more materials to materials folder
 
 
 

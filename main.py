@@ -24,56 +24,71 @@ import matplotlib.pyplot as plt
 import schrodinger_poisson as SP
 
 
-def create_window():
-    """creates application window and contains all window functionality"""
+class Window:
+    """class object for creating tkinter window"""
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Band Structure Calculator")
+        # self.root.state('zoomed')
+        self.root.wm_iconbitmap('icon.ico')
 
-    def restart():
+        # Add top menu toolbar
+        self.menu = tk.Menu(self.root)
+        self.root.config(menu=self.menu)
+        self.file_menu = tk.Menu(self.menu, tearoff=False)
+        self.menu.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label='New calculation...', command=self.restart)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label='Exit', command=self.root.destroy)
+
+        # Left side options
+
+        # choose material
+        self.material = tk.StringVar(self.root)
+        self.material.set('---')
+        tk.Label(self.root, text='Material profile:', borderwidth=10).grid(row=0, column=0)
+        material_choices = ['InSb', 'GaAs', 'Si', 'Select own material...'] # Add more choices with JSON + Get Select own material working
+        self.material = tk.OptionMenu(self.root, self.material, *material_choices)
+        self.material.grid(row=0, column=1, padx=10, pady=5)
+
+        # potential select
+        tk.Label(self.root, text='Potential profile:', borderwidth=10).grid(row=1, column=0)
+        # self.potential_profile = ???
+        # self.potential_profile.grid(row=1, column=1, padx=10, pady=5)
+
+        # N states to find
+        tk.Label(self.root, text='No. of states to find:', borderwidth=10).grid(row=2, column=0)
+        self.N_states = tk.Spinbox(self.root, from_=1, to=10)  # Is 10 enough?
+        self.N_states.grid(row=2, column=1, padx=10, pady=5)
+
+        # add go button
+        self.go_button = tk.Button(self.root, command=self.go, text='GO!', padx=20, pady=10)
+        self.go_button.grid(row=3, column=0, columnspan=2, padx=10, pady=5)
+
+        # matplotlib window
+
+
+        # mainloop
+        self.root.mainloop()
+
+    def restart(self):
         """Restarts window"""
-        root.destroy()
-        create_window()
+        self.root.destroy()
+        self.__init__()
         return
 
-    def go():
+    def go(self):
         """Functionality for GO button in tkinter window"""
         # JSON material variables
         # x, V = file.open(path, unpack=True)
-        N = N_states.get()
+        N = self.N_states.get()
         print(N)
-
-    # Window setup
-    root = tk.Tk()
-    root.title("Band Structure Calculator")
-    # root.state('zoomed')
-    root.wm_iconbitmap('icon.ico')
-
-    # Add top menu toolbar
-    menu = tk.Menu(root)
-    root.config(menu=menu)
-    file_menu = tk.Menu(menu, tearoff=False)
-    menu.add_cascade(label="File", menu=file_menu)
-    file_menu.add_command(label='New calculation...', command=restart)
-    file_menu.add_separator()
-    file_menu.add_command(label='Exit', command=root.destroy)
-
-    # Left side options
-
-    # N states to find
-    N_states = tk.Spinbox(root, from_=1, to=10)  # Is 10 enough?
-    N_states.pack()
-
-    go_button = tk.Button(root, command=go, text='GO!')
-    go_button.pack()
-
-    # embedded matplotlib window
-
-
-    # Run window indefinitely
-    root.mainloop()
 
 
 def main():
     # Main function to run.
-    create_window()
+    Window()
+
 
 if __name__ == '__main__':
     main()
