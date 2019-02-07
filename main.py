@@ -17,11 +17,11 @@ except ImportError:
 import numpy as np
 import matplotlib.pyplot as plt
 
-# WORK OUT HOW TO GET IMPORTS FROM __INIT__.PY
-from schrodinger_poisson.schrodinger import solve_schrodinger
+# from schrodinger_poisson.schrodinger import solve_schrodinger
 # from schrodinger_poisson.poisson import solve_poisson
 # from schrodinger_poisson.diffusion import solve_diffusion
-# from schrodinger_poisson import schrodinger_poisson as SP
+# from schrodinger_poisson import schrodinger_poisson
+import schrodinger_poisson as SP
 
 
 def create_window():
@@ -74,7 +74,6 @@ def create_window():
 def main():
     # Main function to run.
     create_window()
-
 
 if __name__ == '__main__':
     main()

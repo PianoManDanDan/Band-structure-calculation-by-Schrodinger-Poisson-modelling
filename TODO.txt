@@ -20,11 +20,10 @@ main.py
 =======================================================================
 schrodinger_poisson/__init__.py
 =======================================================================
-- In __init__.py, from <module_name> import <function> doesn't work. 
-	- Why doesn't it like importing? Module is in same folder.
-	- In main.py, cannot write:
-		>>> from schrodinger_poisson import <f>
-	- Work out how to get __init__.py import working properly.
+- Is __all__ variable correct?
+- Possibly remove " from schrodinger_poisson import * "	and replace 
+	with explicit imports
+	
 
 
 
