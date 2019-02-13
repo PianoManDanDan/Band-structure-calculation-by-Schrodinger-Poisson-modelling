@@ -14,7 +14,6 @@ main.py
 - Create and 'design' application window.
 - Create dropdown menus for potential. Allow own file options.
 	- Dropdown or just file select?
-- Import JSON and import material values.
 - Add to go() function when ready.
 - Remove main() function and just have Window() in if __name__=='__main__' ?
 - Get material selection working
@@ -28,12 +27,15 @@ main.py
 	with explicit imports
 	
 
+=======================================================================
+./schrodinger_poisson/poisson.py
+=======================================================================
+- Add to docstrings: Add paramters/outputs
+- Is E_field() correct? Should it be eq 3.102 (implemented) or eq 3.103?
 
 
 =======================================================================
 ./materials/
 =======================================================================
 - Add more materials to materials folder
-
-
 
