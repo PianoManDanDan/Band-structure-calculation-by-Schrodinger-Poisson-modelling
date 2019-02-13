@@ -3,6 +3,7 @@
 	"mhh": "float: Effective mass of heavy hole (kg) ",
 	"mlh": "float: Effective mass of light hole (kg)",
 	"Eg": "float: Band Gap of material at 300K (eV)",
+	"dielectric_constant": "float: Static Dielectric constant",
 
 	"Data From" : "http://www.ioffe.ru/SVA/NSM/Semicond/",
 	"Date Accessed" : "21/11/2018",

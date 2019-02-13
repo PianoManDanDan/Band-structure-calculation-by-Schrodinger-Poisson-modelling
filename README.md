@@ -23,6 +23,7 @@ There are several built in preset materials, which you can select from the drop 
 	"mhh": "float: Effective mass of heavy hole (kg) ",
 	"mlh": "float: Effective mass of light hole (kg)",
 	"Eg": "float: Band Gap of material (eV)",
+	"dielectric_constant": "float: dielectric constant of material",
 }
 ```
 
@@ -32,7 +33,7 @@ The example above can be used as a template, and can also be found in the `./mat
 
 ### Creating a potential
 
-To choose a potential, the spatial values and corresponding potential values should be stored in a `.csv` file **with spatial values in the first row, and potential values in the second**. 
+To choose a potential, the spatial values and corresponding potential values should be stored in a `.csv` file **with spatial values in the first column, and potential values in the second**. 
 
 For example, a simple, infinite potential well between -10nm and 10nm with 1000 points can be created using this simple python script:
 
@@ -43,6 +44,7 @@ x = np.linspace(-10e-9, 10e-9, 1000) # metres
 V = np.zeros_like(x) # Joules
 
 potential_profile = np.array([x, V])
+potential_profile = np.transpose(potential_profile) # Needed to make column values
 
 np.savetxt('potential.csv', potential_profile, delimiter=',')
 
