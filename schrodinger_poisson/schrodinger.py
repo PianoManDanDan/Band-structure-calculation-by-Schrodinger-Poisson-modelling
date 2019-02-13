@@ -188,7 +188,12 @@ def solve_schrodinger(x, V, m=constants.m_e, hbar=constants.hbar):
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     x = np.linspace(-1e-8, 1e-8, 1000)
-    V = np.zeros_like(x)
-
+    V = np.ones_like(x) * 1.6e-19 * 200e-3
+    V[abs(x) < 6e-9] = 0
+    V[abs(x) < 2e-9] = 1.6e-19 * 100e-3
 
     eigval, eigvect = solve_schrodinger(x, V)
+    plt.figure()
+    plt.plot(x, (eigvect[:,0:5])*0.5e-19 + eigval[:5])
+    plt.plot(x, V, 'k')
+    plt.show()
