@@ -9,6 +9,8 @@ __author__ = 'Daniel Martin'
 __version__ = '0.1'
 
 # Imports
+import json
+# import
 try:
     import tkinter as tk
 except ImportError:
@@ -27,6 +29,16 @@ import schrodinger_poisson as SP
 class Window:
     """class object for creating tkinter window"""
     def __init__(self):
+        ## VARIABLE SETUP
+        # These variables are assigned values in the go() function.
+        # Initialised in __init__ for better readability.
+        self.me = None
+        self.mhh = None
+        self.mlh = None
+        self.Eg = None
+        self.dielectric_constant = None
+
+        ## TKINTER SETUP
         self.root = tk.Tk()
         self.root.title("Band Structure Calculator")
         # self.root.state('zoomed')
@@ -48,8 +60,8 @@ class Window:
         self.material.set('---')
         tk.Label(self.root, text='Material profile:', borderwidth=10).grid(row=0, column=0)
         material_choices = ['InSb', 'GaAs', 'Si', 'Select own material...'] # Add more choices with JSON + Get Select own material working
-        self.material = tk.OptionMenu(self.root, self.material, *material_choices)
-        self.material.grid(row=0, column=1, padx=10, pady=5)
+        self.material_dropdown = tk.OptionMenu(self.root, self.material, *material_choices)
+        self.material_dropdown.grid(row=0, column=1, padx=10, pady=5)
 
         # potential select
         tk.Label(self.root, text='Potential profile:', borderwidth=10).grid(row=1, column=0)
@@ -68,6 +80,7 @@ class Window:
         # matplotlib window
 
 
+
         # mainloop
         self.root.mainloop()
 
@@ -80,9 +93,24 @@ class Window:
     def go(self):
         """Functionality for GO button in tkinter window"""
         # JSON material variables
+        material = self.material.get()
+        if material == '---':
+            tk.messagebox.showwarning('Warning', 'Please select a material')
+            return
+        elif material == 'Select own material...':
+            pass # Write function for opening file!!!!!
+        else:
+            material = './materials/' + material + '.json'
+            with open(material) as f:
+                material_data = json.load(f)
+            self.me = material_data["me"]
+            self.mhh = material_data["mhh"]
+            self.mlh = material_data["mlh"]
+            self.Eg = material_data["Eg"]
+            self.dielectric_constant = material_data["dielectric_constant"]
         # x, V = file.open(path, unpack=True)
         N = self.N_states.get()
-        print(N)
+        print(N, self.material)
 
 
 def main():
