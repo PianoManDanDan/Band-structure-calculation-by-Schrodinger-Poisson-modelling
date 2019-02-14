@@ -30,8 +30,18 @@ main.py
 =======================================================================
 ./schrodinger_poisson/poisson.py
 =======================================================================
-- Add to docstrings: Add paramters/outputs
 - Is E_field() correct? Should it be eq 3.102 (implemented) or eq 3.103?
+- Clarify questions in diary (12/02/2019 - 14/02/2019)
+
+
+
+=======================================================================
+./schrodinger_poisson/schrodinger_poisson.py
+=======================================================================
+- Write self-consistent algorithm
+- V --> V.append() etc? Work out how to get output so can go backwards
+	and forwards in solutions.
+- Update Parameters in docstring.
 
 
 =======================================================================
