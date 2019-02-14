@@ -9,8 +9,8 @@ domain, x.
 
 __version__ = '0.1'
 __author__ = 'Daniel Martin'
-__all__ = ['_beta', '_M', 'energy_eigenvalues',
-           'wavefunctions', 'solve_schrodinger']
+__all__ = ['_beta', '_M', 'energy_eigenvalues', 'wavefunctions',
+           'solve_schrodinger']
 
 import numpy as np
 from numpy import linalg as LA
@@ -24,7 +24,7 @@ def _beta(x, V, m, hbar):
     Parameters:
     -----------
     x: array of size N
-       linearly spaced, spatial domain of well (m)
+       linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
     m: float
@@ -50,7 +50,7 @@ def _M(x, V, m, hbar):
     Parameters:
     -----------
     x: array of size N
-       linearly spaced, spatial domain of well (m)
+       linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
     m: float
@@ -83,7 +83,7 @@ def energy_eigenvalues(x, V, m=constants.m_e, hbar=constants.hbar):
     Parameters:
     -----------
     x: array of size N
-       linearly spaced, spatial domain of well (m)
+       linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
     m: float
@@ -98,7 +98,9 @@ def energy_eigenvalues(x, V, m=constants.m_e, hbar=constants.hbar):
                  Energy eigenvalues are in Joules.
     """
 
-    # Check x and V have same length
+    if len(x) < 2:
+        raise ValueError('Spatial coordinates must be more than a '
+                         'single point')
     if len(x) != len(V):
         raise ValueError('array x and array V must have same length')
 
@@ -116,7 +118,7 @@ def wavefunctions(x, V, m=constants.m_e, hbar=constants.hbar):
     Parameters:
     -----------
     x: array of size N
-       linearly spaced, spatial domain of well (m)
+       linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
     m: float
@@ -131,7 +133,9 @@ def wavefunctions(x, V, m=constants.m_e, hbar=constants.hbar):
                   eigenvector along x, eigenvectors[:1] is 2nd etc.
     """
 
-    # Check x and V have same length
+    if len(x) < 2:
+        raise ValueError('Spatial coordinates must be more than a '
+                         'single point')
     if len(x) != len(V):
         raise ValueError('array x and array V must have same length')
 
@@ -153,7 +157,7 @@ def solve_schrodinger(x, V, m=constants.m_e, hbar=constants.hbar):
     Parameters:
     -----------
     x: array of size N
-       linearly spaced, spatial domain of well (m)
+       linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
     m: float
@@ -171,7 +175,9 @@ def solve_schrodinger(x, V, m=constants.m_e, hbar=constants.hbar):
                   eigenvector along x, eigenvectors[:1] is 2nd etc.
     """
 
-    # Check x and V have same length
+    if len(x) < 2:
+        raise ValueError('Spatial coordinates must be more than a '
+                         'single point')
     if len(x) != len(V):
         raise ValueError('array x and array V must have same length')
 
