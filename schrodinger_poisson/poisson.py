@@ -32,23 +32,22 @@ def material_permittivity(relative_permittivity):
     return relative_permittivity * constants.epsilon_0
 
 
-def charge_density(q, x, wavefunction, volume_density):
+def charge_density(x, wavefunction, volume_density, q):
     """
     Calculates the spatial charge density for a static charge being
     added into the potential profile.
 
     Parameters:
     -----------
-    q: float
-       Charge of carriers being added to the system (C)
     x: array of size N
        linearly spaced points defining spatial domain of well (m)
     wavefunction: array of size N
-                  single wavefunction eigenstate of potential well (
-                  units??)
+                  single wavefunction eigenstate of potential (units??)
     volume_density: array of size N
                     volume density of dopants at each position in
                     potential well (units??)
+    q: float
+           Charge of carriers being added to the system (C)
 
     Out:
     ----
@@ -118,19 +117,42 @@ def potential_deformation(x, E_field_):
     return - np.trapz(E_field_, x)
 
 
-def solve_poisson(x, V, q=1.6e-19):
+def solve_poisson(x, V, wavefunction, volume_density,
+                  relative_permittivity, q=1.6e-19):
     """
     Combines all other functions in module to output a new potential
     profile.
 
     Parameters:
     -----------
+    x: array of size N
+       linearly spaced points defining spatial domain of well (m)
+    V: array of size N
+       values of potential for each corresponding x value (J)
+    wavefunction: array of size N
+                  single wavefunction eigenstate of potential (units??)
+    volume_density: array of size N
+                    volume density of dopants at each position in
+                    potential well (units??)
+    relative_permittivity: float
+                           static dielectric constant for material at
+                           chosen temperature.
+    q: float
+       Charge of carriers being added to the system (C)
 
     Out:
     ----
-
+    V_new: array of size N
+           New potential to be put through Schrodinger solver
     """
-    return None
+
+    # DO VARIABLE TESTS
+
+    permittivity = material_permittivity(relative_permittivity)
+    charge_density_ = charge_density(q, x, wavefunction, volume_density)
+    E_field_ = E_field(charge_density_, permittivity)
+    deformation = potential_deformation(x, E_field_)
+    return V + deformation
 
 
 if __name__ == '__main__':
