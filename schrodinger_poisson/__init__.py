@@ -8,3 +8,4 @@ from schrodinger import solve_schrodinger
 from poisson import solve_poisson
 from diffusion import solve_diffusion
 from schrodinger_poisson import *
+import materials

@@ -32,7 +32,68 @@ def material_permittivity(relative_permittivity):
     return relative_permittivity * constants.epsilon_0
 
 
-def charge_density(x, wavefunction, volume_density, q):
+def total_carriers(x, volume_density):
+    """
+    Calculates the total number of carriers in each layer from the
+    carrier volume density.
+
+    Parameters:
+    -----------
+    x: array of size N
+       linearly spaced points defining spatial domain of well (m)
+    volume_density: array of size N
+                    volume density of potential carriers for each x
+                    point
+
+    Out:
+    ----
+    total_carriers: float
+                    total number of carriers per unit cross-sectional
+                    area. Calculated by integrating volume_density
+                    over x domain.
+    """
+
+    return np.trapz(volume_density, x)
+
+
+# NEED TO FIX
+def charge_density_multi_band(x, wavefunction, total_carriers, q):
+    """
+    Calculates the spatial charge density for a static charge being
+    added into the potential profile.
+
+    Parameters:
+    -----------
+    x: array of size N
+       linearly spaced points defining spatial domain of well (m)
+    wavefunction: array of size N
+                  single wavefunction eigenstate of potential (units??)
+    total_carriers: array of size N
+                    total number of carriers dopant carriers
+    q: float
+           Charge of carriers being added to the system (C)
+
+    Out:
+    ----
+    charge_density_: array of size N
+                     net charge density of the semiconductor layer (
+                     units??)  <-- is this an accurate description?
+    """
+
+    if len(x) < 2:
+        raise ValueError('Spatial coordinates must be more than a '
+                         'single point')
+    if len(x) != len(volume_density):
+        raise ValueError('Spatial coordinates and volume density must '
+                         'have same shape')
+
+    dz = abs(x[1] - x[0])
+
+    return q * (total_carriers * wavefunction**2 - volume_density) * dz
+
+
+# MAY NEED TO FIX/REMOVE WHEN CHARGE_DENSITY_MULTI_BAND WORKING
+def charge_density_single_band(x, wavefunction, volume_density, q):
     """
     Calculates the spatial charge density for a static charge being
     added into the potential profile.
@@ -117,6 +178,7 @@ def potential_deformation(x, E_field_):
     return - np.trapz(E_field_, x)
 
 
+# DOESN'T WORK YET
 def solve_poisson(x, V, wavefunction, volume_density,
                   relative_permittivity, q=1.6e-19):
     """
@@ -149,7 +211,10 @@ def solve_poisson(x, V, wavefunction, volume_density,
     # DO VARIABLE TESTS
 
     permittivity = material_permittivity(relative_permittivity)
-    charge_density_ = charge_density(q, x, wavefunction, volume_density)
+    # CHANGE TO MULTI BAND WHEN FINISHED:
+    charge_density_ = charge_density_single_band(q, x, wavefunction,
+                                                 volume_density)
+    ###
     E_field_ = E_field(charge_density_, permittivity)
     deformation = potential_deformation(x, E_field_)
     return V + deformation

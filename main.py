@@ -103,14 +103,14 @@ class Window:
             material = './materials/' + material + '.json'
             with open(material) as f:
                 material_data = json.load(f)
-            self.me = material_data["me"]
-            self.mhh = material_data["mhh"]
-            self.mlh = material_data["mlh"]
-            self.Eg = material_data["Eg"]
-            self.dielectric_constant = material_data["dielectric_constant"]
+            self.me = material_data['me']
+            self.mhh = material_data['mhh']
+            self.mlh = material_data['mlh']
+            self.Eg = material_data['Eg']
+            self.dielectric_constant = material_data['dielectric_constant']
         # x, V = file.open(path, unpack=True)
         N = self.N_states.get()
-        print(N, self.material)
+        print(N, self.Eg)
 
 
 def main():

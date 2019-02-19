@@ -193,6 +193,8 @@ def solve_schrodinger(x, V, m=constants.m_e, hbar=constants.hbar):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
+
+    """DEGENERATE STATES PRESENT"""
     x = np.linspace(-1e-8, 1e-8, 1000)
     V = np.ones_like(x) * 1.6e-19 * 200e-3
     V[abs(x) < 6e-9] = 0
@@ -201,5 +203,26 @@ if __name__ == '__main__':
     eigval, eigvect = solve_schrodinger(x, V)
     plt.figure()
     plt.plot(x, (eigvect[:,0:5])*0.5e-19 + eigval[:5])
+    plt.plot(x, V, 'k')
+    # plt.show()
+
+    """QCL"""
+    x = np.linspace(-1e-8, 1e-8, 1000)
+    V = np.ones_like(x) * 1.6e-19 * 200e-3
+    V[100:150] = 0
+    V[200:300] = 0
+    V[375:400] = 0
+    V[450:500] = 0
+    V[525:575] = 0
+    V[650:700] = 0
+    V[825:900] = 0
+    V[925:975] = 0
+
+    V -= 0.5*x*1e-11
+    V -= min(V)
+
+    eigval, eigvect = solve_schrodinger(x, V)
+    plt.figure()
+    plt.plot(x, (eigvect[:, 0:10]) * 0.5e-19 + eigval[:10])
     plt.plot(x, V, 'k')
     plt.show()
