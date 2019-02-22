@@ -52,7 +52,7 @@ class AlGaAs:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
-        self.dielectric_const = (12.9 - 2.84*x) * constants.epsilon_0
+        self.dielectric_constant = (12.9 - 2.84*x) * constants.epsilon_0
         self.mlh = (0.082 + 0.068*x) * constants.m_e
         self.mhh = (0.51 + 0.25*x) * constants.m_e
         if x == 0:
@@ -87,7 +87,7 @@ class InSb:
         Band gap energy (eV)
         """
 
-    def __init__(self, T):
+    def __init__(self, _, T):
         """
         Sets up properties for Si.
 
@@ -130,7 +130,7 @@ class Si:
     Eg: float
         Band gap energy (eV)
     """
-    def __init__(self, T):
+    def __init__(self, _, T):
         """
         Sets up properties for Si.
 

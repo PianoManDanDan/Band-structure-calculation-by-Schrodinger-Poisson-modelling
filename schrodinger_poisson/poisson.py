@@ -232,7 +232,3 @@ if __name__ == '__main__':
     plt.figure()
     plt.plot(x, V_new)
     plt.show()
-
-
-
-

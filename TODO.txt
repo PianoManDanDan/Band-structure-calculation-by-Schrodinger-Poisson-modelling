@@ -17,6 +17,8 @@ main.py
 - Add to go() function when ready.
 - Remove main() function and just have Window() in if __name__=='__main__' ?
 - Get material selection working
+- Put in material x, T values + boxes for selection
+- 
 
 
 =====================================================================================
@@ -47,7 +49,7 @@ main.py
 
 
 =====================================================================================
-./materials/
+./schrodinger_poisson/materials.py
 =====================================================================================
-- Add more materials to materials folder
+- Add more materials to materials file
 
