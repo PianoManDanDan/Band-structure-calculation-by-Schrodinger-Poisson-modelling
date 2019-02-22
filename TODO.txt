@@ -9,6 +9,14 @@ GENERAL
 
 
 =====================================================================================
+README.md
+=====================================================================================
+- Update so JSON is only for choosing own profile. Otherwise, select materail from
+  dropdown.
+- Explain x and T boxes for Al_xGaAs, and T for all others.
+
+
+=====================================================================================
 main.py
 =====================================================================================
 - Create and 'design' application window.
