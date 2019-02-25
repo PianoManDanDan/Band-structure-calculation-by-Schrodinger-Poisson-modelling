@@ -23,10 +23,10 @@ main.py
 - Create dropdown menus for potential. Allow own file options.
 	- Dropdown or just file select?
 - Add to go() function when ready.
-- Remove main() function and just have Window() in if __name__=='__main__' ?
 - Get material selection working
 - Put in material x, T values + boxes for selection
-- 
+- On plotting window, get tight_layout working. If infinite potential, ylabel goes
+  off the left edge of the plotting window. tight_layout() should work, but not.
 
 
 =====================================================================================

@@ -21,6 +21,8 @@ except ImportError:
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 # from schrodinger_poisson.schrodinger import solve_schrodinger
 # from schrodinger_poisson.poisson import solve_poisson
@@ -79,8 +81,11 @@ class Window:
         # potential select
         tk.Label(self.root, text='Potential profile:', borderwidth=10) \
             .grid(row=1, column=0)
-        # self.potential_profile = ???
-        # self.potential_profile.grid(row=1, column=1, padx=10, pady=5)
+        self.potential_button = tk.Button(self.root,
+                                          command=self.get_potential,
+                                          text='select potential',
+                                          padx=10, pady=5)
+        self.potential_button.grid(row=1, column=1, padx=10, pady=5)
 
         # N states to find
         tk.Label(self.root, text='No. of states to find:',
@@ -95,6 +100,18 @@ class Window:
                             padx=10, pady=5)
 
         # matplotlib window
+        fig = plt.Figure(figsize=(5.3, 4.3))
+        self.figure = fig.add_subplot(111)
+        self.figure.set_xlabel('x (nm)')
+        self.figure.set_ylabel('E (meV)')
+        self.figure.grid()
+        self.plot = FigureCanvasTkAgg(fig, master=self.root)
+        # self.plot.tight_
+        self.plot.get_tk_widget().grid(row=0, column=2, rowspan=10,
+                                       columnspan=2, sticky='nesw',
+                                       padx=10, pady=10)
+        # self.plot.tight_layout()
+        self.plot.draw()
 
         # mainloop
         self.root.mainloop()
@@ -109,11 +126,7 @@ class Window:
         """Functionality for GO button in tkinter window"""
         # JSON material variables
         material = self.material.get()
-        if material == '---':
-            tk.messagebox.showwarning('Warning', 'Please select a '
-                                                 'material')
-            return
-        elif material == 'Select own material...':
+        if material == 'Select own material...':
             material_path = askopenfilename(initialdir='./',
                                             title='Select Material File',
                                             filetypes=(
@@ -151,12 +164,28 @@ class Window:
         x, V = np.loadtxt(potential_path, delimiter=',', unpack=True)
         self.x = x
         self.V = V
+
+        # Plot x and V for sanity check - do in window!!
+        # Update plot
+        self.figure.cla()
+        self.figure.plot(self.x/1e-9, self.V/1.6e-22, 'k')
+        self.figure.set_xlabel('x (nm)')
+        self.figure.set_ylabel('E (meV)')
+        self.figure.grid()
+        self.plot.draw()
         return
 
     def go(self):
         """Functionality for GO button in tkinter window"""
+        if self.material.get() == '---':
+            tk.messagebox.showwarning('Warning', 'Please select a '
+                                                 'material')
+            return
+        elif np.any(self.V == None):
+            tk.messagebox.showwarning('Warning', 'Please select a '
+                                                 'potential profile')
+            return
         self.material_select()
-        self.get_potential()
 
         N = self.N_states.get()
         print(N, self.Eg)
@@ -164,10 +193,5 @@ class Window:
         return
 
 
-def main():
-    # Main function to run.
-    Window()
-
-
 if __name__ == '__main__':
-    main()
+    Window()
