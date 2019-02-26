@@ -1,17 +1,13 @@
 =====================================================================================
 GENERAL
 =====================================================================================
-- Create default potential profile .csv files
-	- Is .csv best?
-	- Infinite square
-	- Parabolic (how wide/tall)?
-	- Finite Square (50nm wide, 200eV tall)?
+
 
 
 =====================================================================================
 README.md
 =====================================================================================
-- Update so JSON is only for choosing own profile. Otherwise, select materail from
+- Update so JSON is only for choosing own profile. Otherwise, select material from
   dropdown.
 - Explain x and T boxes for Al_xGaAs, and T for all others.
 
@@ -19,11 +15,11 @@ README.md
 =====================================================================================
 main.py
 =====================================================================================
-- Create and 'design' application window.
+- Create and design application window.
 - Create dropdown menus for potential. Allow own file options.
 	- Dropdown or just file select?
 - Add to go() function when ready.
-- Get material selection working
+- Get material selection working - new setup. Grids of materials for layers.
 - Put in material x, T values + boxes for selection
 - On plotting window, get tight_layout working. If infinite potential, ylabel goes
   off the left edge of the plotting window. tight_layout() should work, but not.
@@ -55,9 +51,4 @@ main.py
 	and forwards in solutions.
 - Update Parameters in docstring.
 
-
-=====================================================================================
-./schrodinger_poisson/materials.py
-=====================================================================================
-- Add more materials to materials file
 

@@ -10,19 +10,20 @@ __version__ = '0.1'
 
 # Imports
 import json
+import warnings
 
-# import
 try:
     import tkinter as tk
     from tkinter.filedialog import askopenfilename
+    from tkinter import ttk
 except ImportError:
     import Tkinter as tk
     from Tkinter.tkFileDialog import askopenfilename
+    from Tkinter import ttk
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
 
 # from schrodinger_poisson.schrodinger import solve_schrodinger
 # from schrodinger_poisson.poisson import solve_poisson
@@ -45,10 +46,14 @@ class Window:
         self.dielectric_constant = None
         self.x = None
         self.V = None
+        self.N_points = None
+        self.N_states = None
+
+        self.reset_settings()
 
         # TKINTER SETUP
         self.root = tk.Tk()
-        self.root.title("Band Structure Calculator")
+        self.root.title('Band Structure Calculator')
         # self.root.state('zoomed')
         self.root.wm_iconbitmap('icon.ico')
 
@@ -56,13 +61,19 @@ class Window:
         self.menu = tk.Menu(self.root)
         self.root.config(menu=self.menu)
         self.file_menu = tk.Menu(self.menu, tearoff=False)
-        self.menu.add_cascade(label="File", menu=self.file_menu)
+        self.menu.add_cascade(label='File', menu=self.file_menu)
         self.file_menu.add_command(label='New calculation...',
                                    command=self.restart)
         self.file_menu.add_separator()
         self.file_menu.add_command(label='Exit',
                                    command=self.root.destroy)
 
+        self.options_menu = tk.Menu(self.menu, tearoff=False)
+        self.menu.add_cascade(label='Settings', menu=self.options_menu)
+        self.options_menu.add_cascade(label='Adjust Settings',
+                                      command=self.adjust_settings)
+        self.options_menu.add_cascade(label='Reset Defaults',
+                                      command=self.reset_settings)
         # Left side options
 
         # choose material
@@ -70,28 +81,22 @@ class Window:
         self.material.set('---')
         tk.Label(self.root, text='Material profile:', borderwidth=10) \
             .grid(row=0, column=0)
-        material_choices = ['InSb', 'GaAs', 'AlGaAs', 'Si',
-                            'Select own material...']
-        # Add more choices with materials.py + Get Select own material
-        # working
-        self.material_dropdown = tk.OptionMenu(self.root, self.material,
-                                               *material_choices)
+        material_choices = ['InSb', 'GaAs', 'AlGaAs', 'InP', 'InAs',
+                            'GaSb', 'Select own material...']
+        # self.material_dropdown = tk.OptionMenu(self.root, self.material,
+        #                                        *material_choices,
+        #                                        command=print('working'))
+        self.material_dropdown = ttk.Combobox(self.root,
+                                              values=material_choices)
         self.material_dropdown.grid(row=0, column=1, padx=10, pady=5)
 
         # potential select
-        tk.Label(self.root, text='Potential profile:', borderwidth=10) \
-            .grid(row=1, column=0)
         self.potential_button = tk.Button(self.root,
                                           command=self.get_potential,
-                                          text='select potential',
+                                          text='Calculate Potential',
                                           padx=10, pady=5)
-        self.potential_button.grid(row=1, column=1, padx=10, pady=5)
-
-        # N states to find
-        tk.Label(self.root, text='No. of states to find:',
-                 borderwidth=10).grid(row=2, column=0)
-        self.N_states = tk.Spinbox(self.root, from_=1, to=1000)
-        self.N_states.grid(row=2, column=1, padx=10, pady=5)
+        self.potential_button.grid(row=1, column=0, columnspan=2,
+                                   padx=10, pady=5)
 
         # add go button
         self.go_button = tk.Button(self.root, command=self.go,
@@ -106,11 +111,9 @@ class Window:
         self.figure.set_ylabel('E (meV)')
         self.figure.grid()
         self.plot = FigureCanvasTkAgg(fig, master=self.root)
-        # self.plot.tight_
         self.plot.get_tk_widget().grid(row=0, column=2, rowspan=10,
                                        columnspan=2, sticky='nesw',
                                        padx=10, pady=10)
-        # self.plot.tight_layout()
         self.plot.draw()
 
         # mainloop
@@ -120,6 +123,48 @@ class Window:
         """Restarts window"""
         self.root.destroy()
         self.__init__()
+        return
+
+    def reset_settings(self):
+        """Reset N_points and N_states to default settings"""
+        self.N_points = 1000
+        self.N_states = 5
+        return
+
+    def adjust_settings(self):
+
+        def accept():
+            try:
+                self.N_points = int(N_points_box.get())
+                self.N_states = int(N_states_spinbox.get())
+            except ValueError:
+                self.N_points = 1000
+                warnings.warn('Number of points not specified. '
+                              'Defaulting to 1000 points',
+                              SyntaxWarning, stacklevel=1)
+            options_window.destroy()
+            return
+
+        options_window = tk.Tk()
+        options_window.title('Options')
+        options_window.wm_iconbitmap('icon.ico')
+
+        tk.Label(options_window, text='No. of points:',
+                 borderwidth=5).grid(row=0, column=0, pady=5)
+        N_points_box = tk.Entry(options_window)
+        N_points_box.grid(row=0, column=1, padx=5)
+
+        tk.Label(options_window, text='No. of states to find:',
+                 borderwidth=5).grid(row=1, column=0, pady=5)
+        N_states_spinbox = tk.Spinbox(options_window, from_=1,
+                                      to=self.N_points)
+        N_states_spinbox.grid(row=1, column=1, padx=5)
+
+        accept_button =tk.Button(options_window, command=accept,
+                                 text='Accept', padx=5, pady=5)
+        accept_button.grid(row=2, column=0, columnspan=2,
+                           sticky='ns', padx=5, pady=8)
+
         return
 
     def material_select(self):
