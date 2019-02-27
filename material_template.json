@@ -1,7 +1,7 @@
 {
-	"me": "float: Effective mass of electron (kg)",
-	"mhh": "float: Effective mass of heavy hole (kg) ",
-	"mlh": "float: Effective mass of light hole (kg)",
+	"me": "float: Effective mass of electron (m0)",
+	"mhh": "float: Effective mass of heavy hole (m0) ",
+	"mlh": "float: Effective mass of light hole (m0)",
 	"Eg": "float: Band Gap of material at 300K (eV)",
 	"dielectric_constant": "float: Static Dielectric constant"
 }
