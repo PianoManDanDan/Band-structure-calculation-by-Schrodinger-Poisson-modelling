@@ -24,11 +24,8 @@ except ImportError:
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
-# from schrodinger_poisson.schrodinger import solve_schrodinger
-# from schrodinger_poisson.poisson import solve_poisson
-# from schrodinger_poisson.diffusion import solve_diffusion
-# from schrodinger_poisson import schrodinger_poisson
 import schrodinger_poisson as sp
 
 
@@ -46,15 +43,17 @@ class Window:
         self.dielectric_constant = None
         self.x = None
         self.V = None
+        self.T = None
         self.N_points = None
         self.N_states = None
+        self.num_materials = 3
 
         self.reset_settings()
 
         # TKINTER SETUP
         self.root = tk.Tk()
         self.root.title('Band Structure Calculator')
-        # self.root.state('zoomed')
+        # self.root.state('zoomed') # Uncomment to open fullscreen
         self.root.wm_iconbitmap('icon.ico')
 
         # Add top menu toolbar
@@ -74,8 +73,83 @@ class Window:
                                       command=self.adjust_settings)
         self.options_menu.add_cascade(label='Reset Defaults',
                                       command=self.reset_settings)
-        # Left side options
 
+        # LEFT HAND SIDE
+        self.LHS = tk.Frame(self.root)
+        self.LHS.grid(row=0, column=0, sticky='news')
+        self.vcmd = (self.LHS.register(self.validate_entry), '%P')
+        # Temperature box
+        temp_frame = tk.Frame(self.LHS)
+        temp_frame.grid(row=0, column=0, columnspan=7)
+        temperature_label = tk.Label(temp_frame, text='Temperature (K)')
+        temperature_label.grid(row=0, column=0, padx=10, pady=5,
+                               sticky='n')
+        self.temperature_entry = tk.Entry(temp_frame, validate='key',
+                                          validatecommand=self.vcmd)
+        self.temperature_entry.bind('<KeyRelease>',
+                                    self.set_temperature)
+        self.temperature_entry.grid(row=0, column=1)
+
+        # Labels for adding in materials
+        material_label = tk.Label(self.LHS, text='Material')
+        material_label.grid(row=1, column=0, pady=10)
+        x_label = tk.Label(self.LHS, text='x')
+        x_label.grid(row=1, column=1, pady=10)
+        thickness_label = tk.Label(self.LHS, text='Thickness\n(nm)')
+        thickness_label.grid(row=1, column=2, pady=10)
+        Eg_label = tk.Label(self.LHS, text='Eg\n(eV)')
+        Eg_label.grid(row=1, column=3, pady=10)
+        me_label = tk.Label(self.LHS, text='me\n(m0)')
+        me_label.grid(row=1, column=4, pady=10)
+        mh_label = tk.Label(self.LHS, text='mh\n(m0)')
+        mh_label.grid(row=1, column=5, pady=10)
+        mlh_label = tk.Label(self.LHS, text='mlh\n(m0)')
+        mlh_label.grid(row=1, column=6, pady=10)
+        dielectric_label = tk.Label(self.LHS, text=u'\u03f5')
+        dielectric_label.grid(row=1, column=7, pady=10)
+
+
+        #####################################################################################
+        # Set material parameters
+        self.material_choices = ['InSb', 'GaAs', 'AlGaAs', 'InP',
+                                 'InAs', 'GaSb', 'Custom']
+        self.material_dropdown1 = ttk.Combobox(self.LHS,
+                                               state='readonly',
+                                               values=self.material_choices,
+                                               width=10)
+        self.material_dropdown1.grid(row=2, column=0, padx=(5, 2))
+        self.x_entry1 = tk.Entry(self.LHS, validate='key',
+                                 state='disabled',
+                                 validatecommand=self.vcmd, width=10)
+        self.x_entry1.grid(row=2, column=1, padx=2, pady=2)
+        self.thickness_entry = tk.Entry(self.LHS, validate='key',
+                                        validatecommand=self.vcmd,
+                                        width=10)
+        self.thickness_entry.grid(row=2, column=2, padx=2, pady=2)
+        self.Eg_entry = tk.Entry(self.LHS, validate='key',
+                                 validatecommand=self.vcmd, width=10)
+        self.Eg_entry.grid(row=2, column=3, padx=2, pady=2)
+        self.me_entry = tk.Entry(self.LHS, validate='key',
+                                 validatecommand=self.vcmd, width=10)
+        self.me_entry.grid(row=2, column=4, padx=2, pady=2)
+        self.mh_entry = tk.Entry(self.LHS, validate='key',
+                                 validatecommand=self.vcmd, width=10)
+        self.mh_entry.grid(row=2, column=5, padx=2, pady=2)
+        self.mlh_entry = tk.Entry(self.LHS, validate='key',
+                                  validatecommand=self.vcmd, width=10)
+        self.mlh_entry.grid(row=2, column=6, padx=2, pady=2)
+        self.dielectric_entry = tk.Entry(self.LHS, validate='key',
+                                         validatecommand=self.vcmd,
+                                         width=10)
+        self.dielectric_entry.grid(row=2, column=7, padx=2, pady=2)
+        #####################################################################################
+        # Button to add in new layers
+        self.add_layer_button = tk.Button(self.LHS,
+                                          command=self.add_layer,
+                                          text='+', padx=5)
+        self.add_layer_button.grid(row=5, column=0, pady=5)
+
+        """
         # choose material
         self.material = tk.StringVar(self.root)
         self.material.set('---')
@@ -87,6 +161,7 @@ class Window:
         #                                        *material_choices,
         #                                        command=print('working'))
         self.material_dropdown = ttk.Combobox(self.root,
+                                              state='readonly',
                                               values=material_choices)
         self.material_dropdown.grid(row=0, column=1, padx=10, pady=5)
 
@@ -103,17 +178,25 @@ class Window:
                                    text='GO!', padx=20, pady=10)
         self.go_button.grid(row=3, column=0, columnspan=2,
                             padx=10, pady=5)
+        """
+        self.RHS = tk.Frame(self.root)
+        self.RHS.grid(row=0, column=1, sticky='news')
 
         # matplotlib window
         fig = plt.Figure(figsize=(5.3, 4.3))
         self.figure = fig.add_subplot(111)
-        self.figure.set_xlabel('x (nm)')
+        self.figure.format_coord = lambda x, y: ''
+        self.figure.set_xlabel('Growth axis (nm)')
         self.figure.set_ylabel('E (meV)')
         self.figure.grid()
-        self.plot = FigureCanvasTkAgg(fig, master=self.root)
-        self.plot.get_tk_widget().grid(row=0, column=2, rowspan=10,
-                                       columnspan=2, sticky='nesw',
-                                       padx=10, pady=10)
+        self.plot = FigureCanvasTkAgg(fig, master=self.RHS)
+        self.plot.get_tk_widget().grid(row=1, column=0, sticky='nesw',
+                                       padx=10, pady=(0, 10))
+        self.toolbar_frame = tk.Frame(master=self.RHS)
+        self.toolbar_frame.grid(row=0, column=0, padx=10, pady=(10,0))
+        self.toolbar = NavigationToolbar2Tk(self.plot, self.toolbar_frame)
+        self.toolbar.update()
+        self.toolbar.grid(row=0, column=0, sticky='news')
         self.plot.draw()
 
         # mainloop
@@ -167,8 +250,38 @@ class Window:
 
         return
 
+    @staticmethod
+    def validate_entry(value_if_allowed):
+        if value_if_allowed == '':
+            return True
+
+        try:
+            float(value_if_allowed)
+            return True
+        except ValueError:
+            return False
+
+    def set_temperature(self, event):
+        if self.temperature_entry.get() == '':
+            return
+        else:
+            self.T = float(self.temperature_entry.get())
+        return
+
+    def add_layer(self):
+        self.add_layer_button.grid_remove()
+        label = tk.Label(self.LHS, text=str(self.num_materials))
+        label.grid(row=self.num_materials+1, column=0)
+        print(self.num_materials)
+        if self.num_materials < 10:
+            self.add_layer_button.grid(row=self.num_materials+2,
+                                       column=0, pady=10)
+        self.num_materials += 1
+        return
+
+    """
     def material_select(self):
-        """Functionality for GO button in tkinter window"""
+        # Functionality for GO button in tkinter window
         # JSON material variables
         material = self.material.get()
         if material == 'Select own material...':
@@ -221,7 +334,7 @@ class Window:
         return
 
     def go(self):
-        """Functionality for GO button in tkinter window"""
+        # Functionality for GO button in tkinter window
         if self.material.get() == '---':
             tk.messagebox.showwarning('Warning', 'Please select a '
                                                  'material')
@@ -236,7 +349,7 @@ class Window:
         print(N, self.Eg)
 
         return
-
+    """
 
 if __name__ == '__main__':
     Window()

@@ -17,11 +17,11 @@ class AlGaAs:
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
-        Effective electron mass (kg)
+        Effective electron mass (m0)
     mlh: float
-         Light hole mass (kg)
+         Light hole mass (m0)
     mhh: float
-         Heavy hole mass (kg)
+         Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
     """
@@ -74,11 +74,11 @@ class InSb:
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
-        Effective electron mass (kg)
+        Effective electron mass (m0)
     mlh: float
-         Light hole mass (kg)
+         Light hole mass (m0)
     mhh: float
-         Heavy hole mass (kg)
+         Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
     """
@@ -116,11 +116,11 @@ class InP:
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
-        Effective electron mass (kg)
+        Effective electron mass (m0)
     mlh: float
-         Light hole mass (kg)
+         Light hole mass (m0)
     mhh: float
-         Heavy hole mass (kg)
+         Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
     """
@@ -158,11 +158,11 @@ class InAs:
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
-        Effective electron mass (kg)
+        Effective electron mass (m0)
     mlh: float
-         Light hole mass (kg)
+         Light hole mass (m0)
     mhh: float
-         Heavy hole mass (kg)
+         Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
     """
@@ -200,11 +200,11 @@ class GaSb:
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
-        Effective electron mass (kg)
+        Effective electron mass (m0)
     mlh: float
-         Light hole mass (kg)
+         Light hole mass (m0)
     mhh: float
-         Heavy hole mass (kg)
+         Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
     """
