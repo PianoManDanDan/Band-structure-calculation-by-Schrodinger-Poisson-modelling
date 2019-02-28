@@ -113,36 +113,59 @@ class Window:
         # Set material parameters
         self.material_choices = ['InSb', 'GaAs', 'AlGaAs', 'InP',
                                  'InAs', 'GaSb', 'Custom']
-        self.material_dropdown1 = ttk.Combobox(self.LHS,
+
+        self.materials_dropdown = [ttk.Combobox(self.LHS,
                                                state='readonly',
                                                values=self.material_choices,
                                                width=10)
-        self.material_dropdown1.grid(row=2, column=0, padx=(5, 2))
-        self.x_entry1 = tk.Entry(self.LHS, validate='key',
+                                   for _ in range(self.num_materials)]
+        self.x_entry = [tk.Entry(self.LHS, validate='key',
                                  state='disabled',
                                  validatecommand=self.vcmd, width=10)
-        self.x_entry1.grid(row=2, column=1, padx=2, pady=2)
-        self.thickness_entry = tk.Entry(self.LHS, validate='key',
-                                        validatecommand=self.vcmd,
-                                        width=10)
-        self.thickness_entry.grid(row=2, column=2, padx=2, pady=2)
-        self.Eg_entry = tk.Entry(self.LHS, validate='key',
-                                 validatecommand=self.vcmd, width=10)
-        self.Eg_entry.grid(row=2, column=3, padx=2, pady=2)
-        self.me_entry = tk.Entry(self.LHS, validate='key',
-                                 validatecommand=self.vcmd, width=10)
-        self.me_entry.grid(row=2, column=4, padx=2, pady=2)
-        self.mh_entry = tk.Entry(self.LHS, validate='key',
-                                 validatecommand=self.vcmd, width=10)
-        self.mh_entry.grid(row=2, column=5, padx=2, pady=2)
-        self.mlh_entry = tk.Entry(self.LHS, validate='key',
-                                  validatecommand=self.vcmd, width=10)
-        self.mlh_entry.grid(row=2, column=6, padx=2, pady=2)
-        self.dielectric_entry = tk.Entry(self.LHS, validate='key',
+                        for _ in range(self.num_materials)]
+        self.thickness_entry = [tk.Entry(self.LHS, validate='key',
                                          validatecommand=self.vcmd,
                                          width=10)
-        self.dielectric_entry.grid(row=2, column=7, padx=2, pady=2)
-        #####################################################################################
+                                for _ in range(self.num_materials)]
+        self.Eg_entry = [tk.Entry(self.LHS, validate='key',
+                                  validatecommand=self.vcmd,
+                                  width=10)
+                         for _ in range(self.num_materials)]
+        self.me_entry = [tk.Entry(self.LHS, validate='key',
+                                  validatecommand=self.vcmd,
+                                  width=10)
+                         for _ in range(self.num_materials)]
+        self.mh_entry = [tk.Entry(self.LHS, validate='key',
+                                  validatecommand=self.vcmd,
+                                  width=10)
+                         for _ in range(self.num_materials)]
+        self.mlh_entry = [tk.Entry(self.LHS, validate='key',
+                                   validatecommand=self.vcmd,
+                                   width=10)
+                          for _ in range(self.num_materials)]
+        self.dielectric_entry = [tk.Entry(self.LHS, validate='key',
+                                          validatecommand=self.vcmd,
+                                          width=10)
+                                 for _ in range(self.num_materials)]
+
+        for i in range(self.num_materials):
+            self.materials_dropdown[i].grid(row=i+2, column=0,
+                                            padx=(5, 2), pady=(4, 0))
+            self.x_entry[i].grid(row=i+2, column=1,
+                                 padx=2, pady=(4, 0))
+            self.thickness_entry[i].grid(row=i+2, column=2,
+                                         padx=2, pady=(4, 0))
+            self.Eg_entry[i].grid(row=i+2, column=3,
+                                  padx=2, pady=(4, 0))
+            self.me_entry[i].grid(row=i+2, column=4,
+                                  padx=2, pady=(4, 0))
+            self.mh_entry[i].grid(row=i+2, column=5,
+                                  padx=2, pady=(4, 0))
+            self.mlh_entry[i].grid(row=i+2, column=6,
+                                   padx=2, pady=(4, 0))
+            self.dielectric_entry[i].grid(row=i+2, column=7,
+                                          padx=(2, 5), pady=(4, 0))
+
         # Button to add in new layers
         self.add_layer_button = tk.Button(self.LHS,
                                           command=self.add_layer,
@@ -150,21 +173,6 @@ class Window:
         self.add_layer_button.grid(row=5, column=0, pady=5)
 
         """
-        # choose material
-        self.material = tk.StringVar(self.root)
-        self.material.set('---')
-        tk.Label(self.root, text='Material profile:', borderwidth=10) \
-            .grid(row=0, column=0)
-        material_choices = ['InSb', 'GaAs', 'AlGaAs', 'InP', 'InAs',
-                            'GaSb', 'Select own material...']
-        # self.material_dropdown = tk.OptionMenu(self.root, self.material,
-        #                                        *material_choices,
-        #                                        command=print('working'))
-        self.material_dropdown = ttk.Combobox(self.root,
-                                              state='readonly',
-                                              values=material_choices)
-        self.material_dropdown.grid(row=0, column=1, padx=10, pady=5)
-
         # potential select
         self.potential_button = tk.Button(self.root,
                                           command=self.get_potential,
@@ -172,7 +180,7 @@ class Window:
                                           padx=10, pady=5)
         self.potential_button.grid(row=1, column=0, columnspan=2,
                                    padx=10, pady=5)
-
+        
         # add go button
         self.go_button = tk.Button(self.root, command=self.go,
                                    text='GO!', padx=20, pady=10)
@@ -185,7 +193,7 @@ class Window:
         # matplotlib window
         fig = plt.Figure(figsize=(5.3, 4.3))
         self.figure = fig.add_subplot(111)
-        self.figure.format_coord = lambda x, y: ''
+        # self.figure.format_coord = lambda x, y: ''
         self.figure.set_xlabel('Growth axis (nm)')
         self.figure.set_ylabel('E (meV)')
         self.figure.grid()
@@ -215,8 +223,12 @@ class Window:
         return
 
     def adjust_settings(self):
-
+        """
+        Adjusts user setting for the number of points and the number of
+        states to find.
+        """
         def accept():
+            """Functionality for accept button"""
             try:
                 self.N_points = int(N_points_box.get())
                 self.N_states = int(N_states_spinbox.get())
@@ -228,23 +240,39 @@ class Window:
             options_window.destroy()
             return
 
+        def validate_int(value_if_allowed):
+            """Validates entry into N_points_box is an integer"""
+            if value_if_allowed == '':
+                return True
+
+            try:
+                int(value_if_allowed)
+                return True
+            except ValueError:
+                return False
+
         options_window = tk.Tk()
         options_window.title('Options')
         options_window.wm_iconbitmap('icon.ico')
-
+        vcmd = (options_window.register(validate_int), '%P')
         tk.Label(options_window, text='No. of points:',
                  borderwidth=5).grid(row=0, column=0, pady=5)
-        N_points_box = tk.Entry(options_window)
+        N_points_box = tk.Entry(options_window, validate='key',
+                                validatecommand=vcmd)
         N_points_box.grid(row=0, column=1, padx=5)
 
         tk.Label(options_window, text='No. of states to find:',
                  borderwidth=5).grid(row=1, column=0, pady=5)
+        N_states_default = tk.StringVar(options_window)
+        N_states_default.set(str(self.N_states))
         N_states_spinbox = tk.Spinbox(options_window, from_=1,
-                                      to=self.N_points)
+                                      to=self.N_points,
+                                      textvariable=N_states_default,
+                                      state='readonly')
         N_states_spinbox.grid(row=1, column=1, padx=5)
 
-        accept_button =tk.Button(options_window, command=accept,
-                                 text='Accept', padx=5, pady=5)
+        accept_button = tk.Button(options_window, command=accept,
+                                  text='Accept', padx=5, pady=5)
         accept_button.grid(row=2, column=0, columnspan=2,
                            sticky='ns', padx=5, pady=8)
 
@@ -252,6 +280,9 @@ class Window:
 
     @staticmethod
     def validate_entry(value_if_allowed):
+        """
+        Allows only numerical characters to be entered into entry boxes
+        """
         if value_if_allowed == '':
             return True
 
@@ -262,6 +293,7 @@ class Window:
             return False
 
     def set_temperature(self, event):
+        """sets self.T as the user types in a value"""
         if self.temperature_entry.get() == '':
             return
         else:
@@ -269,13 +301,65 @@ class Window:
         return
 
     def add_layer(self):
+        """
+        Adds functionality to '+' button. Adds a new material layer
+        row to the window. Currently allows up to a maximum of 10
+        material layers.
+        """
+        # Remove '+' button from window
         self.add_layer_button.grid_remove()
-        label = tk.Label(self.LHS, text=str(self.num_materials))
-        label.grid(row=self.num_materials+1, column=0)
-        print(self.num_materials)
+
+        # Add layer
+        self.materials_dropdown.append(ttk.Combobox(self.LHS,
+                                                    state='readonly',
+                                                    values=self.material_choices,
+                                                    width=10))
+        self.x_entry.append(tk.Entry(self.LHS, validate='key',
+                                     state='readonly',
+                                     validatecommand=self.vcmd,
+                                     width=10))
+        self.thickness_entry.append(tk.Entry(self.LHS, validate='key',
+                                             validatecommand=self.vcmd,
+                                             width=10))
+        self.Eg_entry.append(tk.Entry(self.LHS, validate='key',
+                                      validatecommand=self.vcmd,
+                                      width=10))
+        self.me_entry.append(tk.Entry(self.LHS, validate='key',
+                                      validatecommand=self.vcmd,
+                                      width=10))
+        self.mh_entry.append(tk.Entry(self.LHS, validate='key',
+                                      validatecommand=self.vcmd,
+                                      width=10))
+        self.mlh_entry.append(tk.Entry(self.LHS, validate='key',
+                                       validatecommand=self.vcmd,
+                                       width=10))
+        self.dielectric_entry.append(tk.Entry(self.LHS, validate='key',
+                                              validatecommand=self.vcmd,
+                                              width=10))
+
         if self.num_materials < 10:
-            self.add_layer_button.grid(row=self.num_materials+2,
+            self.materials_dropdown[-1].grid(row=self.num_materials+2,
+                                             column=0, padx=(5, 2),
+                                             pady=(4, 0))
+            self.x_entry[-1].grid(row=self.num_materials+2, column=1,
+                                  padx=2, pady=(4, 0))
+            self.thickness_entry[-1].grid(row=self.num_materials+2,
+                                          column=2, padx=2, pady=(4, 0))
+            self.Eg_entry[-1].grid(row=self.num_materials+2, column=3,
+                                   padx=2, pady=(4, 0))
+            self.me_entry[-1].grid(row=self.num_materials+2, column=4,
+                                   padx=2, pady=(4, 0))
+            self.mh_entry[-1].grid(row=self.num_materials+2, column=5,
+                                   padx=2, pady=(4, 0))
+            self.mlh_entry[-1].grid(row=self.num_materials+2,
+                                    column=6, padx=2, pady=(4, 0))
+            self.dielectric_entry[-1].grid(row=self.num_materials+2,
+                                           column=7, padx=(2, 5),
+                                           pady=(4, 0))
+        if self.num_materials < 9:
+            self.add_layer_button.grid(row=self.num_materials+3,
                                        column=0, pady=10)
+
         self.num_materials += 1
         return
 
