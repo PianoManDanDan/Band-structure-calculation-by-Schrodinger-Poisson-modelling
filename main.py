@@ -174,10 +174,12 @@ class Window:
         self.calc_pot_button = tk.Button(self.LHS,
                                          command=self.calculate_potential,
                                          text='Calculate Potential',
+                                         state='disabled',
                                          padx=5, pady=5)
         self.calc_pot_button.grid(row=4, column=0, columnspan=4)
         self.go_button = tk.Button(self.LHS, command=self.go,
-                                   text='GO!', padx=5, pady=5)
+                                   text='GO!', state='disabled',
+                                   padx=5, pady=5)
         self.go_button.grid(row=4, column=4, columnspan=4)
 
         self.RHS = tk.Frame(self.root)
@@ -326,7 +328,8 @@ class Window:
         material layers.
         """
         # Only add if previous layer is filled
-        if self.materials_dropdown[-1].get() == '':
+        if self.materials_dropdown[-1].get() == '' \
+                or self.thickness_entry[-1].get() == '':
             return
 
         # Remove '+' button from window
@@ -395,6 +398,9 @@ class Window:
                                        column=0, pady=(10, 0))
 
         self.num_materials += 1
+
+        if self.num_materials > 2:
+            self.calc_pot_button.configure(state='normal')
         return
 
     def set_parameters(self, event):
@@ -432,6 +438,9 @@ class Window:
 
     def calculate_potential(self):
         """Calculates potential from input materials"""
+
+        # Enable Go button
+        self.go_button.configure(state='normal')
         return
 
     def go(self):
