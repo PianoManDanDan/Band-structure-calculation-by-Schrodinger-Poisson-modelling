@@ -117,9 +117,9 @@ class Window:
                                  'InP', 'InAs', 'GaSb', 'Custom']
 
         self.materials_dropdown = [ttk.Combobox(self.LHS,
-                                               state='disabled',
-                                               values=self.material_choices,
-                                               width=10)]
+                                                state='disabled',
+                                                values=self.material_choices,
+                                                width=10)]
         self.materials_dropdown[0].bind('<<ComboboxSelected>>',
                                         self.set_parameters)
         self.x_entry = [tk.Entry(self.LHS, validate='key',
@@ -169,6 +169,11 @@ class Window:
                                           command=self.add_layer,
                                           text='+', padx=5)
         self.add_layer_button.grid(row=3, column=0, pady=5)
+        self.remove_layer_button = tk.Button(self.LHS,
+                                             command=self.remove_layer,
+                                             text='-',
+                                             state='disabled', padx=8)
+        self.remove_layer_button.grid(row=3, column=7, pady=5)
 
         # Calculate Potential Button and GO! button
         self.calc_pot_button = tk.Button(self.LHS,
@@ -199,8 +204,9 @@ class Window:
         self.plot.get_tk_widget().grid(row=1, column=0, sticky='nesw',
                                        padx=10, pady=(0, 10))
         self.toolbar_frame = tk.Frame(master=self.RHS)
-        self.toolbar_frame.grid(row=0, column=0, padx=10, pady=(10,0))
-        self.toolbar = NavigationToolbar2Tk(self.plot, self.toolbar_frame)
+        self.toolbar_frame.grid(row=0, column=0, padx=10, pady=(10, 0))
+        self.toolbar = NavigationToolbar2Tk(self.plot,
+                                            self.toolbar_frame)
         self.toolbar.update()
         self.toolbar.grid(row=0, column=0, sticky='news')
         self.plot.draw()
@@ -225,6 +231,7 @@ class Window:
         Adjusts user setting for the number of points and the number of
         states to find.
         """
+
         def accept():
             """Functionality for accept button"""
             try:
@@ -292,33 +299,43 @@ class Window:
 
     def set_temperature(self, event):
         """sets self.T as the user types in a value"""
-        if self.temperature_entry.get() == '':
-            for i in range(self.num_materials):
-                self.materials_dropdown[i].configure(state='disabled')
-                self.x_entry[i].configure(state='disabled')
-                self.thickness_entry[i].configure(state='disabled')
-                self.Eg_entry[i].configure(state='disabled')
-                self.me_entry[i].configure(state='disabled')
-                self.mh_entry[i].configure(state='disabled')
-                self.mlh_entry[i].configure(state='disabled')
-                self.dielectric_entry[i].configure(state='disabled')
+        if self.temperature_entry.get() == '' or \
+                float(self.temperature_entry.get()) <= 0:
+            self.materials_dropdown[-1].configure(state='disabled')
+            self.x_entry[-1].configure(state='readonly')
+            self.thickness_entry[-1].configure(state='readonly')
+            self.Eg_entry[-1].configure(state='readonly')
+            self.me_entry[-1].configure(state='readonly')
+            self.mh_entry[-1].configure(state='readonly')
+            self.mlh_entry[-1].configure(state='readonly')
+            self.dielectric_entry[-1].configure(state='readonly')
             return
         else:
             self.T = float(self.temperature_entry.get())
-            for i in range(self.num_materials):
-                self.materials_dropdown[i].configure(state='readonly')
-                if self.materials_dropdown[i].get() == \
-                        u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
-                    self.x_entry[i].configure(state='normal')
-                self.thickness_entry[i].configure(state='normal')
-                self.Eg_entry[i].configure(state='normal')
-                self.me_entry[i].configure(state='normal')
-                self.mh_entry[i].configure(state='normal')
-                self.mlh_entry[i].configure(state='normal')
-                self.dielectric_entry[i].configure(state='normal')
+            self.materials_dropdown[-1].configure(state='readonly')
+            if self.materials_dropdown[-1].get() == \
+                    u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+                self.x_entry[-1].configure(state='normal')
+            self.thickness_entry[-1].configure(state='normal')
+            self.Eg_entry[-1].configure(state='normal')
+            self.me_entry[-1].configure(state='normal')
+            self.mh_entry[-1].configure(state='normal')
+            self.mlh_entry[-1].configure(state='normal')
+            self.dielectric_entry[-1].configure(state='normal')
 
         # Automatically update Entry boxes if self.T changed
-        self.set_parameters(None)
+        for i in range(self.num_materials):
+            material = self.materials_dropdown[i].get()
+            if material == '' or material == 'Custom' or \
+                    material == u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+                continue
+            else:
+                self.Eg_entry[i].configure(state='normal')
+                self.Eg_entry[i].delete(0, 'end')
+                material = sp.materials.materials[material](self.T)
+                self.Eg_entry[i].insert(0, str(material.Eg)[:5])
+                self.Eg_entry[i].configure(state='readonly')
+            self.Eg_entry[-1].configure(state='normal')
         return
 
     def add_layer(self):
@@ -334,8 +351,19 @@ class Window:
 
         # Remove '+' button from window
         self.add_layer_button.grid_remove()
+        self.remove_layer_button.grid_remove()
         self.calc_pot_button.grid_remove()
         self.go_button.grid_remove()
+
+        # disable previous layer
+        self.materials_dropdown[-1].configure(state='disabled')
+        self.x_entry[-1].configure(state='readonly')
+        self.thickness_entry[-1].configure(state='readonly')
+        self.Eg_entry[-1].configure(state='readonly')
+        self.me_entry[-1].configure(state='readonly')
+        self.mh_entry[-1].configure(state='readonly')
+        self.mlh_entry[-1].configure(state='readonly')
+        self.dielectric_entry[-1].configure(state='readonly')
 
         # Add layer
         self.materials_dropdown.append(ttk.Combobox(self.LHS,
@@ -343,7 +371,7 @@ class Window:
                                                     values=self.material_choices,
                                                     width=10))
         self.materials_dropdown[-1].bind('<<ComboboxSelected>>',
-                                        self.set_parameters)
+                                         self.set_parameters)
         self.x_entry.append(tk.Entry(self.LHS, validate='key',
                                      state='readonly',
                                      validatecommand=self.vcmd,
@@ -369,38 +397,105 @@ class Window:
                                               width=10))
 
         if self.num_materials < 25:
-            self.materials_dropdown[-1].grid(row=self.num_materials+2,
+            self.materials_dropdown[-1].grid(row=self.num_materials + 2,
                                              column=0, padx=(5, 2),
                                              pady=(4, 0))
-            self.x_entry[-1].grid(row=self.num_materials+2, column=1,
+            self.x_entry[-1].grid(row=self.num_materials + 2, column=1,
                                   padx=2, pady=(4, 0))
-            self.thickness_entry[-1].grid(row=self.num_materials+2,
+            self.thickness_entry[-1].grid(row=self.num_materials + 2,
                                           column=2, padx=2, pady=(4, 0))
-            self.Eg_entry[-1].grid(row=self.num_materials+2, column=3,
+            self.Eg_entry[-1].grid(row=self.num_materials + 2, column=3,
                                    padx=2, pady=(4, 0))
-            self.me_entry[-1].grid(row=self.num_materials+2, column=4,
+            self.me_entry[-1].grid(row=self.num_materials + 2, column=4,
                                    padx=2, pady=(4, 0))
-            self.mh_entry[-1].grid(row=self.num_materials+2, column=5,
+            self.mh_entry[-1].grid(row=self.num_materials + 2, column=5,
                                    padx=2, pady=(4, 0))
-            self.mlh_entry[-1].grid(row=self.num_materials+2,
+            self.mlh_entry[-1].grid(row=self.num_materials + 2,
                                     column=6, padx=2, pady=(4, 0))
-            self.dielectric_entry[-1].grid(row=self.num_materials+2,
+            self.dielectric_entry[-1].grid(row=self.num_materials + 2,
                                            column=7, padx=(2, 5),
                                            pady=(4, 0))
 
-            self.calc_pot_button.grid(row=self.num_materials+4,
+            self.remove_layer_button.grid(row=self.num_materials + 3,
+                                          column=7, pady=(10, 0))
+            self.remove_layer_button.configure(state='normal')
+            self.calc_pot_button.grid(row=self.num_materials + 4,
                                       column=0, columnspan=4,
                                       padx=5, pady=(10, 0))
-            self.go_button.grid(row=self.num_materials+4, column=4,
+            self.go_button.grid(row=self.num_materials + 4, column=4,
                                 columnspan=4, padx=5, pady=(10, 0))
         if self.num_materials < 24:
-            self.add_layer_button.grid(row=self.num_materials+3,
+            self.add_layer_button.grid(row=self.num_materials + 3,
                                        column=0, pady=(10, 0))
 
         self.num_materials += 1
 
         if self.num_materials > 2:
             self.calc_pot_button.configure(state='normal')
+        return
+
+    def remove_layer(self):
+        """
+        Adds functionality to '-' button. Removes last material layer
+        row in the window.
+        """
+        # Don't remove last layer
+        if self.num_materials < 2:
+            return
+
+        # Remove buttons from window
+        self.add_layer_button.grid_remove()
+        self.remove_layer_button.grid_remove()
+        self.calc_pot_button.grid_remove()
+        self.go_button.grid_remove()
+
+        # Remove last layer
+        self.materials_dropdown[-1].grid_remove()
+        self.x_entry[-1].grid_remove()
+        self.thickness_entry[-1].grid_remove()
+        self.Eg_entry[-1].grid_remove()
+        self.me_entry[-1].grid_remove()
+        self.mh_entry[-1].grid_remove()
+        self.mlh_entry[-1].grid_remove()
+        self.dielectric_entry[-1].grid_remove()
+
+        self.materials_dropdown.pop(-1)
+        self.x_entry.pop(-1)
+        self.thickness_entry.pop(-1)
+        self.Eg_entry.pop(-1)
+        self.me_entry.pop(-1)
+        self.mh_entry.pop(-1)
+        self.mlh_entry.pop(-1)
+        self.dielectric_entry.pop(-1)
+
+        # Reactivate new final layer
+        self.materials_dropdown[-1].configure(state='readonly')
+        if self.materials_dropdown[-1].get() == \
+                u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+            self.x_entry[-1].configure(state='normal')
+        self.thickness_entry[-1].configure(state='normal')
+        self.Eg_entry[-1].configure(state='normal')
+        self.me_entry[-1].configure(state='normal')
+        self.mh_entry[-1].configure(state='normal')
+        self.mlh_entry[-1].configure(state='normal')
+        self.dielectric_entry[-1].configure(state='normal')
+
+        # re-add buttons
+        self.add_layer_button.grid(row=self.num_materials+2,
+                                   column=0, pady=(10, 0))
+        self.calc_pot_button.grid(row=self.num_materials + 3, column=0,
+                                  columnspan=4, padx=5, pady=(10, 0))
+        self.go_button.grid(row=self.num_materials + 3, column=4,
+                            columnspan=4, padx=5, pady=(10, 0))
+        if self.num_materials > 1:
+            self.remove_layer_button.grid(row=self.num_materials+2,
+                                          column=7, pady=(10, 0))
+
+
+        self.num_materials -= 1
+
+        if self.num_materials < 2:
+            self.calc_pot_button.configure(state='disabled')
         return
 
     def set_parameters(self, event):
@@ -432,7 +527,8 @@ class Window:
         self.me_entry[-1].insert(0, str(material.me)[:5])
         self.mh_entry[-1].insert(0, str(material.mhh)[:5])
         self.mlh_entry[-1].insert(0, str(material.mlh)[:5])
-        self.dielectric_entry[-1].insert(0, str(material.dielectric_constant)[:5])
+        self.dielectric_entry[-1].insert(0, str(
+            material.dielectric_constant)[:5])
 
         return
 
