@@ -7,8 +7,6 @@ GENERAL
 =====================================================================================
 README.md
 =====================================================================================
-- Update so JSON is only for choosing own profile. Otherwise, select material from
-  dropdown.
 - Explain x and T boxes for Al_xGaAs, and T for all others.
 
 
@@ -16,13 +14,13 @@ README.md
 main.py
 =====================================================================================
 - Create and design application window.
-- Create dropdown menus for potential. Allow own file options.
-	- Dropdown or just file select?
 - Add to go() function when ready.
-- Get material selection working - new setup. Grids of materials for layers.
-- Put in material x, T values + boxes for selection
 - On plotting window, get tight_layout working. If infinite potential, ylabel goes
   off the left edge of the plotting window. tight_layout() should work, but not.
+- When new layer added, lock in old layer (state='readonly') and add new layer.
+	- Add layer removal button to get rid of final layer and allow editing of previous
+	  layers
+	- If T changed, work out how to update all boxes - even locked ones
 
 
 =====================================================================================
