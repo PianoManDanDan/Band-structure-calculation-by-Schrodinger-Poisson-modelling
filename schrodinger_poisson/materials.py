@@ -5,12 +5,13 @@ properties of common semiconductor materials.
 
 __version__ = '0.1'
 __author__ = 'Daniel Martin'
-__all__ = ['AlGaAs', 'InSb', 'InP', 'InAs', 'GaSb', 'materials']
+__all__ = ['AlGaAs', 'GaAs', 'AlAs', 'InSb',
+           'InP', 'InAs', 'GaSb','materials']
 
 
 class AlGaAs:
     """
-    class object for AlGaAs, GaAs and AlAs.
+    class object for AlGaAs.
 
     Properties:
     -----------
@@ -61,8 +62,92 @@ class AlGaAs:
             self.me = 0.063 + 0.083*x
             self.Eg = 1.424 + 1.247*x
         else:
-            self.m_e = 0.063 + 0.083*0.45
+            self.me = 0.063 + 0.083*0.45
             self.Eg = 1.9 + 0.125*x + 0.143*x**2
+
+
+class GaAs:
+    """
+    class object for GaAs.
+
+    Properties:
+    -----------
+    dielectric_constant: float
+                         dielectric constant of material (units?)
+    me: float
+        Effective electron mass (m0)
+    mlh: float
+         Light hole mass (m0)
+    mhh: float
+         Heavy hole mass (m0)
+    Eg: float
+        Band gap energy (eV)
+    """
+
+    def __init__(self, T):
+        """
+        Sets up properties for AlGaAs, AlAs and GaAs.
+
+        Parameters:
+        -----------
+        T: float
+           A float greater than zero. Temperature of material in Kelvin.
+        """
+
+        try:
+            float(T)
+        except TypeError:
+            raise TypeError('Temperature must be a float')
+        if T < 0:
+            raise ValueError('Temperature must be at least 0 Kelvin')
+
+        self.dielectric_constant = 12.9
+        self.mlh = 0.082
+        self.mhh = 0.51
+        self.me = 0.063
+        self.Eg = 1.519 - 5.405e-4*T**2 / (T+204)
+
+
+class AlAs:
+    """
+    class object for AlAs.
+
+    Properties:
+    -----------
+    dielectric_constant: float
+                         dielectric constant of material (units?)
+    me: float
+        Effective electron mass (m0)
+    mlh: float
+         Light hole mass (m0)
+    mhh: float
+         Heavy hole mass (m0)
+    Eg: float
+        Band gap energy (eV)
+    """
+
+    def __init__(self, x, T):
+        """
+        Sets up properties for AlGaAs, AlAs and GaAs.
+
+        Parameters:
+        -----------
+        T: float
+           A float greater than zero. Temperature of material in Kelvin.
+        """
+
+        try:
+            float(T)
+        except TypeError:
+            raise TypeError('Temperature must be a float')
+        if T < 0:
+            raise ValueError('Temperature must be at least 0 Kelvin')
+
+        self.dielectric_constant = 12.9 - 2.84
+        self.mlh = 0.082 + 0.068
+        self.mhh = 0.51 + 0.25
+        self.m_e = 0.063 + 0.083*0.45
+        self.Eg = 1.9 + 0.125 + 0.143
 
 
 class InSb:
@@ -83,7 +168,7 @@ class InSb:
         Band gap energy (eV)
     """
 
-    def __init__(self, _, T):
+    def __init__(self, T):
         """
         Sets up properties for InSb.
 
@@ -125,7 +210,7 @@ class InP:
         Band gap energy (eV)
     """
 
-    def __init__(self, _, T):
+    def __init__(self, T):
         """
         Sets up properties for InP.
 
@@ -167,7 +252,7 @@ class InAs:
         Band gap energy (eV)
     """
 
-    def __init__(self, _, T):
+    def __init__(self, T):
         """
         Sets up properties for InAs.
 
@@ -209,7 +294,7 @@ class GaSb:
         Band gap energy (eV)
     """
 
-    def __init__(self, _, T):
+    def __init__(self, T):
         """
         Sets up properties for GaSb.
 
@@ -233,14 +318,14 @@ class GaSb:
         self.Eg = 0.813 - 3.78e-4 * T**2 / (T + 94)
 
 
-materials = {'AlGaAs': AlGaAs, 'AlAs': AlGaAs, 'GaAs': AlGaAs,
+materials = {'AlGaAs': AlGaAs, 'AlAs': AlAs, 'GaAs': GaAs,
              'InSb': InSb, 'InP': InP, 'InAs': InAs, 'GaSb': GaSb}
 
 
 if __name__ == '__main__':
     AlGaAs = materials['AlGaAs'](0.5, 20)
-    AlAs = materials['AlAs'](1, 20)
-    GaAs = materials['GaAs'](0, 20)
+    AlAs = materials['AlAs'](20)
+    GaAs = materials['GaAs'](20)
 
     print(AlGaAs.mhh)
     print(AlAs.mhh)
