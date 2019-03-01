@@ -14,11 +14,11 @@ import warnings
 
 try:
     import tkinter as tk
-    from tkinter.filedialog import askopenfilename
+    from tkinter import messagebox
     from tkinter import ttk
 except ImportError:
     import Tkinter as tk
-    from Tkinter.tkFileDialog import askopenfilename
+    from TKinter import tkMessageBox as messagebox
     from Tkinter import ttk
 
 import numpy as np
@@ -46,12 +46,15 @@ class Window:
         self.T = None
         self.N_points = None
         self.N_states = None
-        self.num_materials = 3
+        self.num_materials = 1
 
         self.reset_settings()
 
         # TKINTER SETUP
         self.root = tk.Tk()
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
+
         self.root.title('Band Structure Calculator')
         # self.root.state('zoomed') # Uncomment to open fullscreen
         self.root.wm_iconbitmap('icon.ico')
@@ -108,87 +111,80 @@ class Window:
         dielectric_label = tk.Label(self.LHS, text=u'\u03f5')
         dielectric_label.grid(row=1, column=7, pady=10)
 
-
-        #####################################################################################
         # Set material parameters
-        self.material_choices = ['InSb', 'GaAs', 'AlGaAs', 'InP',
-                                 'InAs', 'GaSb', 'Custom']
+        self.material_choices = ['InSb', 'GaAs',
+                                 u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs',
+                                 'InP', 'InAs', 'GaSb', 'Custom']
 
         self.materials_dropdown = [ttk.Combobox(self.LHS,
-                                               state='readonly',
+                                               state='disabled',
                                                values=self.material_choices,
-                                               width=10)
-                                   for _ in range(self.num_materials)]
+                                               width=10)]
+        self.materials_dropdown[0].bind('<<ComboboxSelected>>',
+                                        self.set_parameters)
         self.x_entry = [tk.Entry(self.LHS, validate='key',
                                  state='disabled',
-                                 validatecommand=self.vcmd, width=10)
-                        for _ in range(self.num_materials)]
-        self.thickness_entry = [tk.Entry(self.LHS, validate='key',
+                                 validatecommand=self.vcmd, width=10)]
+        self.x_entry[0].bind('<KeyRelease>', self.set_parameters)
+        self.thickness_entry = [tk.Entry(self.LHS, state='disabled',
+                                         validate='key',
                                          validatecommand=self.vcmd,
-                                         width=10)
-                                for _ in range(self.num_materials)]
-        self.Eg_entry = [tk.Entry(self.LHS, validate='key',
-                                  validatecommand=self.vcmd,
-                                  width=10)
-                         for _ in range(self.num_materials)]
-        self.me_entry = [tk.Entry(self.LHS, validate='key',
-                                  validatecommand=self.vcmd,
-                                  width=10)
-                         for _ in range(self.num_materials)]
-        self.mh_entry = [tk.Entry(self.LHS, validate='key',
-                                  validatecommand=self.vcmd,
-                                  width=10)
-                         for _ in range(self.num_materials)]
-        self.mlh_entry = [tk.Entry(self.LHS, validate='key',
-                                   validatecommand=self.vcmd,
-                                   width=10)
-                          for _ in range(self.num_materials)]
-        self.dielectric_entry = [tk.Entry(self.LHS, validate='key',
+                                         width=10)]
+        self.Eg_entry = [tk.Entry(self.LHS, state='disabled',
+                                  validate='key',
+                                  validatecommand=self.vcmd, width=10)]
+        self.me_entry = [tk.Entry(self.LHS, state='disabled',
+                                  validate='key',
+                                  validatecommand=self.vcmd, width=10)]
+        self.mh_entry = [tk.Entry(self.LHS, state='disabled',
+                                  validate='key',
+                                  validatecommand=self.vcmd, width=10)]
+        self.mlh_entry = [tk.Entry(self.LHS, state='disabled',
+                                   validate='key',
+                                   validatecommand=self.vcmd, width=10)]
+        self.dielectric_entry = [tk.Entry(self.LHS, state='disabled',
+                                          validate='key',
                                           validatecommand=self.vcmd,
-                                          width=10)
-                                 for _ in range(self.num_materials)]
+                                          width=10)]
 
-        for i in range(self.num_materials):
-            self.materials_dropdown[i].grid(row=i+2, column=0,
-                                            padx=(5, 2), pady=(4, 0))
-            self.x_entry[i].grid(row=i+2, column=1,
-                                 padx=2, pady=(4, 0))
-            self.thickness_entry[i].grid(row=i+2, column=2,
-                                         padx=2, pady=(4, 0))
-            self.Eg_entry[i].grid(row=i+2, column=3,
-                                  padx=2, pady=(4, 0))
-            self.me_entry[i].grid(row=i+2, column=4,
-                                  padx=2, pady=(4, 0))
-            self.mh_entry[i].grid(row=i+2, column=5,
-                                  padx=2, pady=(4, 0))
-            self.mlh_entry[i].grid(row=i+2, column=6,
-                                   padx=2, pady=(4, 0))
-            self.dielectric_entry[i].grid(row=i+2, column=7,
-                                          padx=(2, 5), pady=(4, 0))
+        self.materials_dropdown[0].grid(row=2, column=0,
+                                        padx=(5, 2), pady=(4, 0))
+        self.x_entry[0].grid(row=2, column=1,
+                             padx=2, pady=(4, 0))
+        self.thickness_entry[0].grid(row=2, column=2,
+                                     padx=2, pady=(4, 0))
+        self.Eg_entry[0].grid(row=2, column=3,
+                              padx=2, pady=(4, 0))
+        self.me_entry[0].grid(row=2, column=4,
+                              padx=2, pady=(4, 0))
+        self.mh_entry[0].grid(row=2, column=5,
+                              padx=2, pady=(4, 0))
+        self.mlh_entry[0].grid(row=2, column=6,
+                               padx=2, pady=(4, 0))
+        self.dielectric_entry[0].grid(row=2, column=7,
+                                      padx=(2, 5), pady=(4, 0))
 
         # Button to add in new layers
         self.add_layer_button = tk.Button(self.LHS,
                                           command=self.add_layer,
                                           text='+', padx=5)
-        self.add_layer_button.grid(row=5, column=0, pady=5)
+        self.add_layer_button.grid(row=3, column=0, pady=5)
 
-        """
-        # potential select
-        self.potential_button = tk.Button(self.root,
-                                          command=self.get_potential,
-                                          text='Calculate Potential',
-                                          padx=10, pady=5)
-        self.potential_button.grid(row=1, column=0, columnspan=2,
-                                   padx=10, pady=5)
-        
-        # add go button
-        self.go_button = tk.Button(self.root, command=self.go,
-                                   text='GO!', padx=20, pady=10)
-        self.go_button.grid(row=3, column=0, columnspan=2,
-                            padx=10, pady=5)
-        """
+        # Calculate Potential Button and GO! button
+        self.calc_pot_button = tk.Button(self.LHS,
+                                         command=self.calculate_potential,
+                                         text='Calculate Potential',
+                                         padx=5, pady=5)
+        self.calc_pot_button.grid(row=4, column=0, columnspan=4)
+        self.go_button = tk.Button(self.LHS, command=self.go,
+                                   text='GO!', padx=5, pady=5)
+        self.go_button.grid(row=4, column=4, columnspan=4)
+
         self.RHS = tk.Frame(self.root)
         self.RHS.grid(row=0, column=1, sticky='news')
+
+        self.RHS.grid_rowconfigure(1, weight=1)
+        self.RHS.grid_columnconfigure(0, weight=1)
 
         # matplotlib window
         fig = plt.Figure(figsize=(5.3, 4.3))
@@ -295,9 +291,32 @@ class Window:
     def set_temperature(self, event):
         """sets self.T as the user types in a value"""
         if self.temperature_entry.get() == '':
+            for i in range(self.num_materials):
+                self.materials_dropdown[i].configure(state='disabled')
+                self.x_entry[i].configure(state='disabled')
+                self.thickness_entry[i].configure(state='disabled')
+                self.Eg_entry[i].configure(state='disabled')
+                self.me_entry[i].configure(state='disabled')
+                self.mh_entry[i].configure(state='disabled')
+                self.mlh_entry[i].configure(state='disabled')
+                self.dielectric_entry[i].configure(state='disabled')
             return
         else:
             self.T = float(self.temperature_entry.get())
+            for i in range(self.num_materials):
+                self.materials_dropdown[i].configure(state='readonly')
+                if self.materials_dropdown[i].get() == \
+                        u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+                    self.x_entry[i].configure(state='normal')
+                self.thickness_entry[i].configure(state='normal')
+                self.Eg_entry[i].configure(state='normal')
+                self.me_entry[i].configure(state='normal')
+                self.mh_entry[i].configure(state='normal')
+                self.mlh_entry[i].configure(state='normal')
+                self.dielectric_entry[i].configure(state='normal')
+
+        # Automatically update Entry boxes if self.T changed
+        self.set_parameters(None)
         return
 
     def add_layer(self):
@@ -306,18 +325,27 @@ class Window:
         row to the window. Currently allows up to a maximum of 10
         material layers.
         """
+        # Only add if previous layer is filled
+        if self.materials_dropdown[-1].get() == '':
+            return
+
         # Remove '+' button from window
         self.add_layer_button.grid_remove()
+        self.calc_pot_button.grid_remove()
+        self.go_button.grid_remove()
 
         # Add layer
         self.materials_dropdown.append(ttk.Combobox(self.LHS,
                                                     state='readonly',
                                                     values=self.material_choices,
                                                     width=10))
+        self.materials_dropdown[-1].bind('<<ComboboxSelected>>',
+                                        self.set_parameters)
         self.x_entry.append(tk.Entry(self.LHS, validate='key',
                                      state='readonly',
                                      validatecommand=self.vcmd,
                                      width=10))
+        self.x_entry[-1].bind('<KeyRelease>', self.set_parameters)
         self.thickness_entry.append(tk.Entry(self.LHS, validate='key',
                                              validatecommand=self.vcmd,
                                              width=10))
@@ -337,7 +365,7 @@ class Window:
                                               validatecommand=self.vcmd,
                                               width=10))
 
-        if self.num_materials < 10:
+        if self.num_materials < 25:
             self.materials_dropdown[-1].grid(row=self.num_materials+2,
                                              column=0, padx=(5, 2),
                                              pady=(4, 0))
@@ -356,84 +384,60 @@ class Window:
             self.dielectric_entry[-1].grid(row=self.num_materials+2,
                                            column=7, padx=(2, 5),
                                            pady=(4, 0))
-        if self.num_materials < 9:
+
+            self.calc_pot_button.grid(row=self.num_materials+4,
+                                      column=0, columnspan=4,
+                                      padx=5, pady=(10, 0))
+            self.go_button.grid(row=self.num_materials+4, column=4,
+                                columnspan=4, padx=5, pady=(10, 0))
+        if self.num_materials < 24:
             self.add_layer_button.grid(row=self.num_materials+3,
-                                       column=0, pady=10)
+                                       column=0, pady=(10, 0))
 
         self.num_materials += 1
         return
 
-    """
-    def material_select(self):
-        # Functionality for GO button in tkinter window
-        # JSON material variables
-        material = self.material.get()
-        if material == 'Select own material...':
-            material_path = askopenfilename(initialdir='./',
-                                            title='Select Material File',
-                                            filetypes=(
-                                                ('JSON file', '*.json'),
-                                                ('all files', '*.*')))
-            with open(material_path) as f:
-                material_data = json.load(f)
-            self.me = material_data['me']
-            self.mhh = material_data['mhh']
-            self.mlh = material_data['mlh']
-            self.Eg = material_data['Eg']
-            self.dielectric_constant = \
-                material_data['dielectric_constant']
+    def set_parameters(self, event):
+        """Sets parameters when material is selected"""
+        chosen_material = self.materials_dropdown[-1].get()
+
+        # Clear values in case of material change
+        self.Eg_entry[-1].delete(0, 'end')
+        self.me_entry[-1].delete(0, 'end')
+        self.mh_entry[-1].delete(0, 'end')
+        self.mlh_entry[-1].delete(0, 'end')
+        self.dielectric_entry[-1].delete(0, 'end')
+
+        if chosen_material == '' or chosen_material == 'Custom':
+            return
+        if chosen_material == \
+                u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs' and \
+                self.x_entry[-1].get() == '':
+            self.x_entry[-1].configure(state='normal')
+            return
+        if chosen_material == \
+                u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+            x_entry = float(self.x_entry[-1].get())
+            material = sp.materials.AlGaAs(x_entry, self.T)
         else:
-            # material_x.get()  # material x box
-            # material_T.get()  # material T box
-            material_x = 0
-            material_T = 0
-            chosen_material = sp.materials.materials[material](
-                material_x, material_T)
-            self.me = chosen_material.me
-            self.mhh = chosen_material.mhh
-            self.mlh = chosen_material.mlh
-            self.Eg = chosen_material.Eg
-            self.dielectric_constant = \
-                chosen_material.dielectric_constant
+            material = sp.materials.materials[chosen_material](self.T)
+
+        self.Eg_entry[-1].insert(0, str(material.Eg)[:5])
+        self.me_entry[-1].insert(0, str(material.me)[:5])
+        self.mh_entry[-1].insert(0, str(material.mhh)[:5])
+        self.mlh_entry[-1].insert(0, str(material.mlh)[:5])
+        self.dielectric_entry[-1].insert(0, str(material.dielectric_constant)[:5])
+
         return
 
-    def get_potential(self):
-        potential_path = askopenfilename(initialdir='./',
-                                         title='Select Potential File',
-                                         filetypes=(
-                                             ('CSV file', '*.csv'),
-                                             ('all files', '*.*')))
-        x, V = np.loadtxt(potential_path, delimiter=',', unpack=True)
-        self.x = x
-        self.V = V
-
-        # Plot x and V for sanity check - do in window!!
-        # Update plot
-        self.figure.cla()
-        self.figure.plot(self.x/1e-9, self.V/1.6e-22, 'k')
-        self.figure.set_xlabel('x (nm)')
-        self.figure.set_ylabel('E (meV)')
-        self.figure.grid()
-        self.plot.draw()
+    def calculate_potential(self):
+        """Calculates potential from input materials"""
         return
 
     def go(self):
-        # Functionality for GO button in tkinter window
-        if self.material.get() == '---':
-            tk.messagebox.showwarning('Warning', 'Please select a '
-                                                 'material')
-            return
-        elif np.any(self.V == None):
-            tk.messagebox.showwarning('Warning', 'Please select a '
-                                                 'potential profile')
-            return
-        self.material_select()
-
-        N = self.N_states.get()
-        print(N, self.Eg)
-
+        """Functionality for GO! button. Calculates band structure"""
         return
-    """
+
 
 if __name__ == '__main__':
     Window()
