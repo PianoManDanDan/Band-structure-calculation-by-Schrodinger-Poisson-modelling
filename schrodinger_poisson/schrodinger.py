@@ -226,3 +226,4 @@ if __name__ == '__main__':
     plt.plot(x, (eigvect[:, 0:10]) * 0.5e-19 + eigval[:10])
     plt.plot(x, V, 'k')
     plt.show()
+

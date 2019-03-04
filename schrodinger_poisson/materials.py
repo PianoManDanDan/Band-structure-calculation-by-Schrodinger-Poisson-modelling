@@ -5,8 +5,8 @@ properties of common semiconductor materials.
 
 __version__ = '0.1'
 __author__ = 'Daniel Martin'
-__all__ = ['AlGaAs', 'GaAs', 'AlAs', 'InSb',
-           'InP', 'InAs', 'GaSb','materials']
+__all__ = ['AlGaAs', 'GaAs', 'AlAs', 'InSb', 'InP', 'InAs', 'GaSb',
+           'Custom', 'materials']
 
 
 class AlGaAs:
@@ -15,6 +15,8 @@ class AlGaAs:
 
     Properties:
     -----------
+    name: string
+          Name of class
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -25,11 +27,13 @@ class AlGaAs:
          Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
+    lattice_constant: float
+                      Material lattice constant (A)
     """
 
     def __init__(self, x, T):
         """
-        Sets up properties for AlGaAs, AlAs and GaAs.
+        Sets up properties for AlGaAs.
 
         Parameters:
         -----------
@@ -52,6 +56,8 @@ class AlGaAs:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
+        self.name = 'AlGaAs'
+
         self.dielectric_constant = 12.9 - 2.84*x
         self.mlh = 0.082 + 0.068*x
         self.mhh = 0.51 + 0.25*x
@@ -64,6 +70,7 @@ class AlGaAs:
         else:
             self.me = 0.063 + 0.083*0.45
             self.Eg = 1.9 + 0.125*x + 0.143*x**2
+        self.lattice_constant = 5.6533 + 0.0078*x
 
 
 class GaAs:
@@ -72,6 +79,8 @@ class GaAs:
 
     Properties:
     -----------
+    name: string
+          Name of class
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -82,11 +91,13 @@ class GaAs:
          Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
+    lattice_constant: float
+                      Material lattice constant (A)
     """
 
     def __init__(self, T):
         """
-        Sets up properties for AlGaAs, AlAs and GaAs.
+        Sets up properties for GaAs.
 
         Parameters:
         -----------
@@ -101,11 +112,13 @@ class GaAs:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
+        self.name = 'GaAs'
         self.dielectric_constant = 12.9
         self.mlh = 0.082
         self.mhh = 0.51
         self.me = 0.063
         self.Eg = 1.519 - 5.405e-4*T**2 / (T+204)
+        self.lattice_constant = 5.65325
 
 
 class AlAs:
@@ -114,6 +127,8 @@ class AlAs:
 
     Properties:
     -----------
+    name: string
+          Name of class
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -124,11 +139,13 @@ class AlAs:
          Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
+    lattice_constant: float
+                      Material lattice constant (A)
     """
 
     def __init__(self, x, T):
         """
-        Sets up properties for AlGaAs, AlAs and GaAs.
+        Sets up properties for AlAs.
 
         Parameters:
         -----------
@@ -143,11 +160,13 @@ class AlAs:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
+        self.name = 'AlAs'
         self.dielectric_constant = 12.9 - 2.84
         self.mlh = 0.082 + 0.068
         self.mhh = 0.51 + 0.25
         self.m_e = 0.063 + 0.083*0.45
         self.Eg = 1.9 + 0.125 + 0.143
+        self.lattice_constant = 5.6533 + 0.0078
 
 
 class InSb:
@@ -156,6 +175,8 @@ class InSb:
 
     Properties:
     -----------
+    name: string
+          Name of class
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -166,6 +187,8 @@ class InSb:
          Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
+    lattice_constant: float
+                      Material lattice constant (A)
     """
 
     def __init__(self, T):
@@ -185,11 +208,13 @@ class InSb:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
+        self.name = 'InSb'
         self.dielectric_constant = 16.8
         self.me = 0.014
         self.mlh = 0.015
         self.mhh = 0.43
         self.Eg = 0.24 - 6e-4 * T**2 / (T + 500)
+        self.lattice_constant = 6.479
 
 
 class InP:
@@ -198,6 +223,8 @@ class InP:
 
     Properties:
     -----------
+    name: string
+          Name of class
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -208,6 +235,8 @@ class InP:
          Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
+    lattice_constant: float
+                      Material lattice constant (A)
     """
 
     def __init__(self, T):
@@ -227,11 +256,13 @@ class InP:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
+        self.name = 'InP'
         self.dielectric_constant = 12.5
         self.me = 0.08
         self.mlh = 0.089
         self.mhh = 0.6
         self.Eg = 1.421 - 4.9e-4 * T**2 / (T + 327)
+        self.lattice_constant = 5.8687
 
 
 class InAs:
@@ -240,6 +271,8 @@ class InAs:
 
     Properties:
     -----------
+    name: string
+          Name of class
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -250,6 +283,8 @@ class InAs:
          Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
+    lattice_constant: float
+                      Material lattice constant (A)
     """
 
     def __init__(self, T):
@@ -269,11 +304,13 @@ class InAs:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
+        self.name = 'InAs'
         self.dielectric_constant = 15.15
         self.me = 0.023
         self.mlh = 0.026
         self.mhh = 0.41
         self.Eg = 0.415 - 2.76e-4 * T**2 / (T + 83)
+        self.lattice_constant = 6.0583
 
 
 class GaSb:
@@ -282,6 +319,8 @@ class GaSb:
 
     Properties:
     -----------
+    name: string
+          Name of class
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -292,6 +331,8 @@ class GaSb:
          Heavy hole mass (m0)
     Eg: float
         Band gap energy (eV)
+    lattice_constant: float
+                      Material lattice constant (A)
     """
 
     def __init__(self, T):
@@ -311,15 +352,66 @@ class GaSb:
         if T < 0:
             raise ValueError('Temperature must be at least 0 Kelvin')
 
+        self.name = 'GaSb'
         self.dielectric_constant = 15.7
         self.me = 0.041
         self.mlh = 0.05
         self.mhh = 0.4
         self.Eg = 0.813 - 3.78e-4 * T**2 / (T + 94)
+        self.lattice_constant = 6.09593
 
+
+class Custom:
+    """
+        class object for Custom material.
+
+        Properties:
+        -----------
+        name: string
+              Name of class
+        dielectric_constant: float
+                             dielectric constant of material (units?)
+        me: float
+            Effective electron mass (m0)
+        mlh: float
+             Light hole mass (m0)
+        mhh: float
+             Heavy hole mass (m0)
+        Eg: float
+            Band gap energy (eV)
+        lattice_constant: float
+                          Material lattice constant (A)
+        """
+
+    def __init__(self, Eg, me, mh, mlh, dielectric):
+        """
+        Sets up properties for Custom material.
+
+        Parameters:
+        -----------
+        Eg: float
+            Band gap energy (eV)
+        me: float
+            Effective electron mass (m0)
+        mh: float
+            Heavy hole mass (m0)
+        mlh: float
+             Light hole mass (m0)
+        dielectric: float
+                    dielectric constant of material (units?)
+        """
+
+        self.name = 'Custom'
+        self.dielectric_constant = dielectric
+        self.me = me
+        self.mlh = mlh
+        self.mhh = mh
+        self.Eg = Eg
+        self.lattice_constant = 0
 
 materials = {'AlGaAs': AlGaAs, 'AlAs': AlAs, 'GaAs': GaAs,
-             'InSb': InSb, 'InP': InP, 'InAs': InAs, 'GaSb': GaSb}
+             'InSb': InSb, 'InP': InP, 'InAs': InAs, 'GaSb': GaSb,
+             'Custom': Custom}
 
 
 if __name__ == '__main__':

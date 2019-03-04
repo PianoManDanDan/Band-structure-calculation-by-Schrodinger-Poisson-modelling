@@ -1,4 +1,5 @@
-__all__ = ['diffusion', 'poisson', 'schrodinger', 'schrodinger_poisson']
+__all__ = ['anderson', 'diffusion', 'materials', 'poisson',
+           'schrodinger', 'schrodinger_poisson']
 
 import sys
 import os
@@ -8,4 +9,5 @@ from schrodinger import solve_schrodinger
 from poisson import solve_poisson
 from diffusion import solve_diffusion
 from schrodinger_poisson import *
-import materials
+from materials import materials
+from anderson import anderson
