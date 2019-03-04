@@ -7,7 +7,7 @@ GENERAL
 =====================================================================================
 README.md
 =====================================================================================
-- Explain x and T boxes for Al_xGaAs, and T for all others.
+
 
 
 =====================================================================================
@@ -17,10 +17,8 @@ main.py
 - Add to go() function when ready.
 - On plotting window, get tight_layout working. If infinite potential, ylabel goes
   off the left edge of the plotting window. tight_layout() should work, but not.
-- When new layer added, lock in old layer (state='readonly') and add new layer.
-	- Add layer removal button to get rid of final layer and allow editing of previous
-	  layers
-	- If T changed, work out how to update all boxes - even locked ones
+- In calc_potential():
+	- 
 
 
 =====================================================================================
@@ -29,7 +27,13 @@ main.py
 - Is __all__ variable correct?
 - Possibly remove " from schrodinger_poisson import * "	and replace 
 	with explicit imports
-	
+
+
+=====================================================================================
+./schrodinger_poisson/materials.py
+=====================================================================================
+- Custom: Add try/except to float() all inputs
+
 
 =====================================================================================
 ./schrodinger_poisson/poisson.py
