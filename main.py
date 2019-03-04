@@ -9,7 +9,6 @@ __author__ = 'Daniel Martin'
 __version__ = '0.1'
 
 # Imports
-import json
 import warnings
 
 try:
@@ -44,6 +43,8 @@ class Window:
         self.x = None
         self.V = None
         self.T = None
+        self.eigvals = None
+        self.eigvects = None
         self.N_points = None
         self.N_states = None
         self.num_materials = 1
@@ -332,7 +333,7 @@ class Window:
             else:
                 self.Eg_entry[i].configure(state='normal')
                 self.Eg_entry[i].delete(0, 'end')
-                material = sp.materials.materials[material](self.T)
+                material = sp.materials[material](self.T)
                 self.Eg_entry[i].insert(0, str(material.Eg)[:5])
                 self.Eg_entry[i].configure(state='readonly')
             self.Eg_entry[-1].configure(state='normal')
@@ -500,6 +501,7 @@ class Window:
 
     def set_parameters(self, event):
         """Sets parameters when material is selected"""
+
         chosen_material = self.materials_dropdown[-1].get()
 
         # Clear values in case of material change
@@ -519,21 +521,73 @@ class Window:
         if chosen_material == \
                 u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
             x_entry = float(self.x_entry[-1].get())
-            material = sp.materials.AlGaAs(x_entry, self.T)
+            material = sp.materials['AlGaAs'](x_entry, self.T)
         else:
-            material = sp.materials.materials[chosen_material](self.T)
+            material = sp.materials[chosen_material](self.T)
 
         self.Eg_entry[-1].insert(0, str(material.Eg)[:5])
         self.me_entry[-1].insert(0, str(material.me)[:5])
         self.mh_entry[-1].insert(0, str(material.mhh)[:5])
         self.mlh_entry[-1].insert(0, str(material.mlh)[:5])
-        self.dielectric_entry[-1].insert(0, str(
-            material.dielectric_constant)[:5])
+        self.dielectric_entry[-1].insert(0, str(material.dielectric_constant)[:5])
 
         return
 
     def calculate_potential(self):
         """Calculates potential from input materials"""
+
+        # Remove last level if row is empty
+        if self.materials_dropdown[-1].get() == '':
+            self.remove_layer()
+
+        # Check all values filled in if last layer is 'Custom'
+        if self.materials_dropdown[-1].get() == 'Custom':
+            params = np.array([self.Eg_entry[-1].get(),
+                               self.me_entry[-1].get(),
+                               self.mh_entry[-1].get(),
+                               self.mlh_entry[-1].get(),
+                               self.dielectric_entry[-1].get()])
+            if any(params == ''):
+                raise ValueError('Final layer must have a full set of '
+                                 'parameters')
+
+        # Check for final layer thickness
+        if self.thickness_entry[-1].get() == '':
+            raise ValueError('Final layer must have a thickness')
+
+        # Calculate total thickness of material
+        total_thickness = 0
+        for i in range(self.num_materials):
+            total_thickness += float(self.thickness_entry[i].get())
+
+        # create growth axis parameter
+        self.x = np.linspace(0, total_thickness, self.N_points) * 1e-9
+
+        # Make list of material classes to pass to anderson
+        material_list = []
+        for i in range(self.num_materials):
+            material = self.materials_dropdown[i].get()
+            if material == \
+                    u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+                x_entry = self.x_entry[i].get()
+                material.append(sp.materials['AlGaAs'](x_entry, self.T))
+            elif material == 'Custom':
+                material_list.append(sp.materials[material](
+                                    float(self.Eg_entry[i].get()),
+                                    float(self.me_entry[i].get()),
+                                    float(self.mh_entry[i].get()),
+                                    float(self.mlh_entry[i].get()),
+                                    float(self.dielectric_entry[i].get()))
+                                )
+            else:
+                material_list.append(sp.materials[material](self.T))
+
+
+        # CALCULATE V!!! - Write sp.anderson() function
+        # self.V = sp.anderson(self.x, material_list)
+
+        # Plot potential to plotting window.
+
 
         # Enable Go button
         self.go_button.configure(state='normal')
