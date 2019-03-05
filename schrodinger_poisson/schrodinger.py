@@ -27,7 +27,7 @@ def _beta(x, V, m, hbar):
        linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
-    m: float
+    m: array of size N
        electron mass (kg)
     hbar: float
           Planck's constant / 2 pi (Js)
@@ -53,7 +53,7 @@ def _M(x, V, m, hbar):
        linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
-    m: float
+    m: array of size N
        electron mass (kg)
     hbar: float
           Planck's constant / 2 pi (Js)
@@ -75,7 +75,7 @@ def _M(x, V, m, hbar):
     return M * hbar ** 2 / (2.0 * m * dx ** 2)
 
 
-def energy_eigenvalues(x, V, m=constants.m_e, hbar=constants.hbar):
+def energy_eigenvalues(x, V, m=None, hbar=constants.hbar):
     """
     This function calculates the energy eigenvalues of a given potential
     over a domain of x.
@@ -86,7 +86,7 @@ def energy_eigenvalues(x, V, m=constants.m_e, hbar=constants.hbar):
        linearly spaced points defining spatial domain of well (m)
     V: array of size N
        values of potential for each corresponding x value (J)
-    m: float
+    m: array of size N
        electron mass (kg)
     hbar: float
           Planck's constant / 2 pi (Js)
@@ -103,6 +103,12 @@ def energy_eigenvalues(x, V, m=constants.m_e, hbar=constants.hbar):
                          'single point')
     if len(x) != len(V):
         raise ValueError('array x and array V must have same length')
+    if m is None:
+        m = np.ones_like(x) * constants.m_e
+    else:
+        if len(x) != len(m):
+            raise ValueError('array x and array m must have same '
+                             'length')
 
     M = _M(x, V, m, hbar)
     eigenvalues = LA.eigvalsh(M, UPLO='U')
@@ -110,7 +116,7 @@ def energy_eigenvalues(x, V, m=constants.m_e, hbar=constants.hbar):
     return eigenvalues
 
 
-def wavefunctions(x, V, m=constants.m_e, hbar=constants.hbar):
+def wavefunctions(x, V, m=None, hbar=constants.hbar):
     """
     This function calculates the wavefunctions for a given potential
     over a domain of x.
@@ -138,6 +144,12 @@ def wavefunctions(x, V, m=constants.m_e, hbar=constants.hbar):
                          'single point')
     if len(x) != len(V):
         raise ValueError('array x and array V must have same length')
+    if m is None:
+        m = np.ones_like(x) * constants.m_e
+    else:
+        if len(x) != len(m):
+            raise ValueError('array x and array m must have same '
+                             'length')
 
     M = _M(x, V, m, hbar)
     _, eigenvectors = LA.eigh(M, UPLO='U')
@@ -149,7 +161,7 @@ def wavefunctions(x, V, m=constants.m_e, hbar=constants.hbar):
     return eigenvectors
 
 
-def solve_schrodinger(x, V, m=constants.m_e, hbar=constants.hbar):
+def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
     """
     This function calculates the energy eigenvalues and corresponding
     wavefunctions for a given potential over a domain of x.
@@ -180,6 +192,12 @@ def solve_schrodinger(x, V, m=constants.m_e, hbar=constants.hbar):
                          'single point')
     if len(x) != len(V):
         raise ValueError('array x and array V must have same length')
+    if m is None:
+        m = np.ones_like(x) * constants.m_e
+    else:
+        if len(x) != len(m):
+            raise ValueError('array x and array m must have same '
+                             'length')
 
     M = _M(x, V, m, hbar)
     eigenvalues, eigenvectors = LA.eigh(M, UPLO='U')
