@@ -154,9 +154,10 @@ def wavefunctions(x, V, m=None, hbar=constants.hbar):
     M = _M(x, V, m, hbar)
     _, eigenvectors = LA.eigh(M, UPLO='U')
 
-    for i in range(len(x)):
-        if eigenvectors[0, i] > eigenvectors[1, i]:
-            eigenvectors[:, i] *= -1
+    # Uncomment if eigvectors need flipping
+    # for i in range(len(x)):
+    #     if eigenvectors[0, i] > eigenvectors[1, i]:
+    #         eigenvectors[:, i] *= -1
 
     return eigenvectors
 
@@ -202,9 +203,10 @@ def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
     M = _M(x, V, m, hbar)
     eigenvalues, eigenvectors = LA.eigh(M, UPLO='U')
 
-    for i in range(len(x)):
-        if eigenvectors[0, i] > eigenvectors[1, i]:
-            eigenvectors[:, i] *= -1
+    # Uncomment if eigvectors need flipping
+    # for i in range(len(x)):
+    #     if eigenvectors[0, i] > eigenvectors[1, i]:
+    #         eigenvectors[:, i] *= -1
 
     return eigenvalues, eigenvectors
 
