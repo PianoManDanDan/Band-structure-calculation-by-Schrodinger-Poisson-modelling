@@ -13,12 +13,10 @@ README.md
 =====================================================================================
 main.py
 =====================================================================================
-- Create and design application window.
 - Add to go() function when ready.
+	- Make schrodinger function to make electron mass array and solve schrodinger
 - On plotting window, get tight_layout working. If infinite potential, ylabel goes
   off the left edge of the plotting window. tight_layout() should work, but not.
-- In calc_potential():
-	- 
 
 
 =====================================================================================
@@ -33,6 +31,12 @@ main.py
 ./schrodinger_poisson/materials.py
 =====================================================================================
 - Custom: Add try/except to float() all inputs
+
+
+=====================================================================================
+./schrodinger_poisson/schrodinger.py
+=====================================================================================
+- Change mass to allow for array of masses
 
 
 =====================================================================================
