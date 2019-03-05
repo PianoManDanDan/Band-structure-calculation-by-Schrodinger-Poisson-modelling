@@ -8,6 +8,7 @@ __author__ = 'Daniel Martin'
 __all__ = ['anderson']
 
 import numpy as np
+from scipy import constants
 
 
 def anderson(growth_axis, material_list, material_thickness):
@@ -39,9 +40,9 @@ def anderson(growth_axis, material_list, material_thickness):
         prev_mat = material_list[i-1]
         next_mat = material_list[i]
         if prev_mat.name == 'AlGaAs' and next_mat.name == 'GaAs':
-            dV[i] = 0.34 * dV[i-1] #- dV[i-1]
+            dV[i] = 0.34 * dV[i-1]
         elif prev_mat.name == 'GaAs' and next_mat.name == 'AlGaAs':
-            dV[i] = dV[i-1] / 0.34 #- dV[i-1]
+            dV[i] = dV[i-1] / 0.34
         else:
             dV[i] = dV[i-1] + (next_mat.Eg - prev_mat.Eg) / 2
 
@@ -49,10 +50,7 @@ def anderson(growth_axis, material_list, material_thickness):
     for i in range(len(dV)):
         V[growth_axis >= cum_thickness[i]] = dV[i]
 
-    print(f'material_list: {material_list}')
-    print(f'dV: {dV}')
-    print(f'thickness: {material_thickness}')
-    print(f'cum thick: {cum_thickness}')
+    V *= constants.eV
     return V
 
 

@@ -24,6 +24,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+from scipy import constants
 
 import schrodinger_poisson as sp
 
@@ -35,11 +36,14 @@ class Window:
         # VARIABLE SETUP
         # These variables are assigned values in the go() function.
         # Initialised in __init__ for better readability.
+        self.material_list = None
+        self.thickness = None
+        self.total_thickness = None
         self.me = None
         self.mhh = None
         self.mlh = None
         self.Eg = None
-        self.dielectric_constant = None
+        self.dielectric = None
         self.x = None
         self.V = None
         self.T = None
@@ -122,11 +126,11 @@ class Window:
                                                 values=self.material_choices,
                                                 width=10)]
         self.materials_dropdown[0].bind('<<ComboboxSelected>>',
-                                        self.set_parameters)
+                                        self.insert_parameters)
         self.x_entry = [tk.Entry(self.LHS, validate='key',
                                  state='disabled',
                                  validatecommand=self.vcmd, width=10)]
-        self.x_entry[0].bind('<KeyRelease>', self.set_parameters)
+        self.x_entry[0].bind('<KeyRelease>', self.insert_parameters)
         self.thickness_entry = [tk.Entry(self.LHS, state='disabled',
                                          validate='key',
                                          validatecommand=self.vcmd,
@@ -198,7 +202,7 @@ class Window:
         fig = plt.Figure(figsize=(5.3, 4.3))
         self.figure = fig.add_subplot(111)
         self.figure.set_xlabel('Growth axis (nm)')
-        self.figure.set_ylabel('E (meV)')
+        self.figure.set_ylabel('E (eV)')
         self.figure.grid()
         self.plot = FigureCanvasTkAgg(fig, master=self.RHS)
         self.plot.get_tk_widget().grid(row=1, column=0, sticky='nesw',
@@ -372,12 +376,12 @@ class Window:
                                                     values=self.material_choices,
                                                     width=10))
         self.materials_dropdown[-1].bind('<<ComboboxSelected>>',
-                                         self.set_parameters)
+                                         self.insert_parameters)
         self.x_entry.append(tk.Entry(self.LHS, validate='key',
                                      state='readonly',
                                      validatecommand=self.vcmd,
                                      width=10))
-        self.x_entry[-1].bind('<KeyRelease>', self.set_parameters)
+        self.x_entry[-1].bind('<KeyRelease>', self.insert_parameters)
         self.thickness_entry.append(tk.Entry(self.LHS, validate='key',
                                              validatecommand=self.vcmd,
                                              width=10))
@@ -495,13 +499,18 @@ class Window:
 
         self.num_materials -= 1
 
+        if self.num_materials < 2:
+            self.remove_layer_button.configure(state='disabled')
+
         if self.num_materials < 3:
             self.calc_pot_button.configure(state='disabled')
             self.go_button.configure(state='disabled')
         return
 
-    def set_parameters(self, event):
-        """Sets parameters when material is selected"""
+    def insert_parameters(self, event):
+        """
+        Inserts parameters into entry boxes when material is selected.
+        """
 
         chosen_material = self.materials_dropdown[-1].get()
 
@@ -536,6 +545,75 @@ class Window:
 
         return
 
+    def set_parameters(self):
+        """set parameters into variables for use in calculations"""
+
+        # Make list of material classes
+        self.material_list = []
+        for i in range(self.num_materials):
+            material = self.materials_dropdown[i].get()
+            if material == \
+                    u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+                x_entry = float(self.x_entry[i].get())
+                self.material_list.append(sp.materials['AlGaAs'](
+                                                            x_entry,
+                                                            self.T))
+            elif material == 'Custom':
+                self.material_list.append(sp.materials[material](
+                    float(self.Eg_entry[i].get()),
+                    float(self.me_entry[i].get()),
+                    float(self.mh_entry[i].get()),
+                    float(self.mlh_entry[i].get()),
+                    float(self.dielectric_entry[i].get()))
+                )
+            else:
+                self.material_list.append(sp.materials[material](self.T))
+
+        # Make array of thicknesses
+        self.thickness = np.array([])
+        for i in range(self.num_materials):
+            self.thickness = np.append(self.thickness,
+                                       float(self.thickness_entry[i].get()))
+        self.thickness *= 1e-9
+        self.total_thickness = sum(self.thickness)
+        cum_thickness = np.insert(self.thickness, 0, 0)
+        cum_thickness = np.cumsum(cum_thickness)
+
+        # create growth axis parameter
+        self.x = np.linspace(0, self.total_thickness, self.N_points)
+
+        # Make array of Eg
+        self.Eg = np.zeros_like(self.x)
+        for i in range(self.num_materials):
+            self.Eg[self.x >= cum_thickness[i]] = float(self.Eg_entry[i].get())
+        self.Eg *= constants.eV
+
+        # Make array of electron mass
+        self.me = np.zeros_like(self.x)
+        for i in range(self.num_materials):
+            self.me[self.x >= cum_thickness[i]] = float(self.me_entry[i].get())
+        self.me *= constants.m_e
+
+        # Make array of heavy hole mass
+        self.mhh = np.zeros_like(self.x)
+        for i in range(self.num_materials):
+            self.mhh[self.x >= cum_thickness[i]] = float(self.mh_entry[i].get())
+        self.mhh *= constants.m_e
+
+        # Make array of light hole mass
+        self.mlh = np.zeros_like(self.x)
+        for i in range(self.num_materials):
+            self.mlh[self.x >= cum_thickness[i]] = float(self.mlh_entry[i].get())
+        self.mlh *= constants.m_e
+
+        # Make array of dielectric
+        self.dielectric = np.zeros_like(self.x)
+        for i in range(self.num_materials):
+            self.mhh[self.x >= cum_thickness[i]] = float(self.dielectric_entry[i].get())
+        self.dielectric *= constants.epsilon_0
+
+        return
+
     def calculate_potential(self):
         """Calculates potential from input materials"""
 
@@ -558,49 +636,21 @@ class Window:
         if self.thickness_entry[-1].get() == '':
             raise ValueError('Final layer must have a thickness')
 
-        # Calculate total thickness of material
-        material_thickness = np.array([])
-        for i in range(self.num_materials):
-            material_thickness = np.append(material_thickness,
-                                           float(self.thickness_entry[i].get()))
-
-        material_thickness *= 1e-9
-        total_thickness = sum(material_thickness)
-
-        # create growth axis parameter
-        self.x = np.linspace(0, total_thickness, self.N_points)
-
-        # Make list of material classes to pass to anderson
-        material_list = []
-        for i in range(self.num_materials):
-            material = self.materials_dropdown[i].get()
-            if material == \
-                    u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
-                x_entry = float(self.x_entry[i].get())
-                material_list.append(sp.materials['AlGaAs'](x_entry,
-                                                            self.T))
-            elif material == 'Custom':
-                material_list.append(sp.materials[material](
-                                    float(self.Eg_entry[i].get()),
-                                    float(self.me_entry[i].get()),
-                                    float(self.mh_entry[i].get()),
-                                    float(self.mlh_entry[i].get()),
-                                    float(self.dielectric_entry[i].get()))
-                                )
-            else:
-                material_list.append(sp.materials[material](self.T))
+        # Set parameters from entry boxes
+        self.set_parameters()
 
         # Strain calculation
-        sp.strain(material_list)
+        sp.strain(self.material_list)
 
         # calculate V
-        self.V = sp.anderson(self.x, material_list, material_thickness)
+        self.V = sp.anderson(self.x, self.material_list,
+                             self.thickness)
 
         # Plot potential to plotting window.
         self.figure.cla()
-        self.figure.plot(self.x / 1e-9, self.V, 'k')
+        self.figure.plot(self.x / 1e-9, self.V / constants.eV, 'k')
         self.figure.set_xlabel('x (nm)')
-        self.figure.set_ylabel('E (meV)')
+        self.figure.set_ylabel('E (eV)')
         self.figure.grid()
         self.plot.draw()
 
@@ -612,7 +662,20 @@ class Window:
     def go(self):
         """Functionality for GO! button. Calculates band structure"""
 
-        eigval, eigvect = sp.solve_schrodinger(self.x, self.V)
+        # Calculate eigenvalues and eigenvectors for potential
+        self.eigvals, self.eigvects = sp.solve_schrodinger(self.x,
+                                                           self.V)
+
+        # Plot eigenvectors
+        for i in range(self.N_states):
+            if self.eigvals[i] > max(self.V):
+                break
+            self.figure.plot(self.x / 1e-9,
+                             self.eigvects[:, i] + self.eigvals[i] / constants.eV,
+                             label=r'$\psi_{0}$'.format(i))
+        self.figure.legend(loc='best')
+        self.plot.draw()
+
         return
 
 
