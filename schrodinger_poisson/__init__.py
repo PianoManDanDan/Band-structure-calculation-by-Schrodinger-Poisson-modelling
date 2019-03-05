@@ -1,5 +1,5 @@
 __all__ = ['anderson', 'diffusion', 'materials', 'poisson',
-           'schrodinger', 'schrodinger_poisson']
+           'schrodinger', 'strain', 'schrodinger_poisson']
 
 import sys
 import os
@@ -11,3 +11,4 @@ from diffusion import solve_diffusion
 from schrodinger_poisson import *
 from materials import materials
 from anderson import anderson
+from strain import strain
