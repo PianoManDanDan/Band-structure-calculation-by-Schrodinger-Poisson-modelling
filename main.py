@@ -197,7 +197,6 @@ class Window:
         # matplotlib window
         fig = plt.Figure(figsize=(5.3, 4.3))
         self.figure = fig.add_subplot(111)
-        # self.figure.format_coord = lambda x, y: ''
         self.figure.set_xlabel('Growth axis (nm)')
         self.figure.set_ylabel('E (meV)')
         self.figure.grid()
@@ -205,7 +204,8 @@ class Window:
         self.plot.get_tk_widget().grid(row=1, column=0, sticky='nesw',
                                        padx=10, pady=(0, 10))
         self.toolbar_frame = tk.Frame(master=self.RHS)
-        self.toolbar_frame.grid(row=0, column=0, padx=10, pady=(10, 0))
+        self.toolbar_frame.grid(row=0, column=0, padx=10, pady=(10, 0),
+                                sticky='news')
         self.toolbar = NavigationToolbar2Tk(self.plot,
                                             self.toolbar_frame)
         self.toolbar.update()
@@ -495,8 +495,9 @@ class Window:
 
         self.num_materials -= 1
 
-        if self.num_materials < 2:
+        if self.num_materials < 3:
             self.calc_pot_button.configure(state='disabled')
+            self.go_button.configure(state='disabled')
         return
 
     def set_parameters(self, event):
@@ -523,6 +524,8 @@ class Window:
             x_entry = float(self.x_entry[-1].get())
             material = sp.materials['AlGaAs'](x_entry, self.T)
         else:
+            self.x_entry[-1].delete(0, 'end')
+            self.x_entry[-1].configure(state='disabled')
             material = sp.materials[chosen_material](self.T)
 
         self.Eg_entry[-1].insert(0, str(material.Eg)[:5])
@@ -556,12 +559,16 @@ class Window:
             raise ValueError('Final layer must have a thickness')
 
         # Calculate total thickness of material
-        total_thickness = 0
+        material_thickness = np.array([])
         for i in range(self.num_materials):
-            total_thickness += float(self.thickness_entry[i].get())
+            material_thickness = np.append(material_thickness,
+                                           float(self.thickness_entry[i].get()))
+
+        material_thickness *= 1e-9
+        total_thickness = sum(material_thickness)
 
         # create growth axis parameter
-        self.x = np.linspace(0, total_thickness, self.N_points) * 1e-9
+        self.x = np.linspace(0, total_thickness, self.N_points)
 
         # Make list of material classes to pass to anderson
         material_list = []
@@ -569,8 +576,9 @@ class Window:
             material = self.materials_dropdown[i].get()
             if material == \
                     u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
-                x_entry = self.x_entry[i].get()
-                material.append(sp.materials['AlGaAs'](x_entry, self.T))
+                x_entry = float(self.x_entry[i].get())
+                material_list.append(sp.materials['AlGaAs'](x_entry,
+                                                            self.T))
             elif material == 'Custom':
                 material_list.append(sp.materials[material](
                                     float(self.Eg_entry[i].get()),
@@ -582,11 +590,19 @@ class Window:
             else:
                 material_list.append(sp.materials[material](self.T))
 
+        # Strain calculation
+        sp.strain(material_list)
 
-        # CALCULATE V!!! - Write sp.anderson() function
-        # self.V = sp.anderson(self.x, material_list)
+        # calculate V
+        self.V = sp.anderson(self.x, material_list, material_thickness)
 
         # Plot potential to plotting window.
+        self.figure.cla()
+        self.figure.plot(self.x / 1e-9, self.V, 'k')
+        self.figure.set_xlabel('x (nm)')
+        self.figure.set_ylabel('E (meV)')
+        self.figure.grid()
+        self.plot.draw()
 
 
         # Enable Go button
@@ -595,6 +611,8 @@ class Window:
 
     def go(self):
         """Functionality for GO! button. Calculates band structure"""
+
+        eigval, eigvect = sp.solve_schrodinger(self.x, self.V)
         return
 
 
