@@ -51,6 +51,7 @@ class Window:
         self.eigvects = None
         self.N_points = None
         self.N_states = None
+        self.particle = None
         self.num_materials = 1
 
         self.reset_settings()
@@ -229,6 +230,7 @@ class Window:
         """Reset N_points and N_states to default settings"""
         self.N_points = 1000
         self.N_states = 5
+        self.particle = 'e'
         return
 
     def adjust_settings(self):
@@ -240,13 +242,15 @@ class Window:
         def accept():
             """Functionality for accept button"""
             try:
-                self.N_points = int(N_points_box.get())
                 self.N_states = int(N_states_spinbox.get())
+                self.particle = particle.get()
+                self.N_points = int(N_points_box.get())
             except ValueError:
                 self.N_points = 1000
                 warnings.warn('Number of points not specified. '
                               'Defaulting to 1000 points',
                               SyntaxWarning, stacklevel=1)
+            print(particle.get())
             options_window.destroy()
             return
 
@@ -269,7 +273,7 @@ class Window:
                  borderwidth=5).grid(row=0, column=0, pady=5)
         N_points_box = tk.Entry(options_window, validate='key',
                                 validatecommand=vcmd)
-        N_points_box.grid(row=0, column=1, padx=5)
+        N_points_box.grid(row=0, column=1, padx=5, sticky='ew')
 
         tk.Label(options_window, text='No. of states to find:',
                  borderwidth=5).grid(row=1, column=0, pady=5)
@@ -279,11 +283,26 @@ class Window:
                                       to=self.N_points,
                                       textvariable=N_states_default,
                                       state='readonly')
-        N_states_spinbox.grid(row=1, column=1, padx=5)
+        N_states_spinbox.grid(row=1, column=1, padx=5, sticky='ew')
+
+        particle = tk.StringVar(options_window)
+        particle.set('e')
+        tk.Label(options_window, text='Particle:',
+                 borderwidth=5).grid(row=2, column=0, rowspan=3,
+                                     pady=5, sticky='n')
+        e_radio = tk.Radiobutton(options_window, text='Electron',
+                                 variable=particle, value='e')
+        e_radio.grid(row=2, column=1, pady=(5, 0), sticky='w')
+        mhh_radio = tk.Radiobutton(options_window, text='Heavy Hole',
+                                   variable=particle, value='hh')
+        mhh_radio.grid(row=3, column=1, sticky='w')
+        mlh_radio = tk.Radiobutton(options_window, text='Light Hole',
+                                   variable=particle, value='lh')
+        mlh_radio.grid(row=4, column=1, pady=(0, 5), sticky='w')
 
         accept_button = tk.Button(options_window, command=accept,
                                   text='Accept', padx=5, pady=5)
-        accept_button.grid(row=2, column=0, columnspan=2,
+        accept_button.grid(row=5, column=0, columnspan=2,
                            sticky='ns', padx=5, pady=8)
 
         return
@@ -662,17 +681,30 @@ class Window:
     def go(self):
         """Functionality for GO! button. Calculates band structure"""
 
+        # Determine what particle to use: electron, heavy hole,
+        # light hole
+        particle_options = {'e': self.me, 'hh': self.mhh, 'lh': self.mlh}
+        particle = particle_options[self.particle]
+
         # Calculate eigenvalues and eigenvectors for potential
         self.eigvals, self.eigvects = sp.solve_schrodinger(self.x,
-                                                           self.V)
+                                                           self.V,
+                                                           particle)
 
         # Plot eigenvectors
-        for i in range(self.N_states):
+        num_plotted = 0
+        i = 0
+        while num_plotted < self.N_states:
             if self.eigvals[i] > max(self.V):
                 break
+            if self.eigvals[i] < 0:
+                i += 1
+                continue
             self.figure.plot(self.x / 1e-9,
                              self.eigvects[:, i] + self.eigvals[i] / constants.eV,
-                             label=r'$\psi_{0}$'.format(i))
+                             label=r'$\psi_{0}$'.format(num_plotted))
+            num_plotted += 1
+            i += 1
         self.figure.legend(loc='best')
         self.plot.draw()
 
