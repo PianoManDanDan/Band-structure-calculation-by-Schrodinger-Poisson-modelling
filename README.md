@@ -22,5 +22,5 @@ To run the Schrodinger-Poisson solver:
 6. Click on the 'Calculate Potential' button to calculate the potential and plot it on the figure on the right hand side.
 7. Click on the 'GO!' button to calculate the Schrodinger-Poisson solutions.
 
-You can adjust the number of wavefunctions to find, as well as the number of points used by changing the Settings in the 'Settings' tab. The default settings are to find 5 wavefunctions for each potential and to use 1000 points.
+You can adjust the number of wavefunctions to find, the number of points used and the particle type by changing the Settings in the 'Settings' tab. The default settings are to find 5 wavefunctions for each potential, to use 1000 points and that electrons are being used.
 
