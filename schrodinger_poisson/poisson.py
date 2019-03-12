@@ -12,6 +12,7 @@ import numpy as np
 from scipy import constants
 
 
+# NOT NEEDED
 def material_permittivity(relative_permittivity):
     """
     Calculates the overall permittivity of the material from the
@@ -56,8 +57,7 @@ def total_carriers(x, volume_density):
     return np.trapz(volume_density, x)
 
 
-# NEED TO FIX
-def charge_density_multi_band(x, wavefunction, total_carriers, q):
+def charge_density_multi_band(x, wavefunction, volume_density, q):
     """
     Calculates the spatial charge density for a static charge being
     added into the potential profile.
@@ -66,12 +66,14 @@ def charge_density_multi_band(x, wavefunction, total_carriers, q):
     -----------
     x: array of size N
        linearly spaced points defining spatial domain of well (m)
-    wavefunction: array of size N
-                  single wavefunction eigenstate of potential (units??)
-    total_carriers: array of size N
-                    total number of carriers dopant carriers
+    wavefunction: array of size NxN
+                  wavefunction eigenstates of potential. Each column
+                  is a higher order eigenfunction
+    volume_density: array of size N
+                    volume density of dopant carriers at each spatial
+                     position
     q: float
-           Charge of carriers being added to the system (C)
+       Charge of carriers being added to the system (C)
 
     Out:
     ----
@@ -89,7 +91,13 @@ def charge_density_multi_band(x, wavefunction, total_carriers, q):
 
     dz = abs(x[1] - x[0])
 
-    return q * (total_carriers * wavefunction**2 - volume_density) * dz
+    wavefunc_squared = np.zeros_like(x)
+    for i in len(x):
+        wavefunc_squared += wavefunction[:, i]**2
+
+    N = total_carriers(x, volume_density)
+
+    return q * (N * wavefunc_squared - volume_density) * dz
 
 
 # MAY NEED TO FIX/REMOVE WHEN CHARGE_DENSITY_MULTI_BAND WORKING
@@ -179,8 +187,8 @@ def potential_deformation(x, E_field_):
 
 
 # DOESN'T WORK YET
-def solve_poisson(x, V, wavefunction, volume_density,
-                  relative_permittivity, q=1.6e-19):
+def solve_poisson(x, V, wavefunction, volume_density, permittivity,
+                  q=1.6e-19):
     """
     Combines all other functions in module to output a new potential
     profile.
@@ -210,7 +218,6 @@ def solve_poisson(x, V, wavefunction, volume_density,
 
     # DO VARIABLE TESTS
 
-    permittivity = material_permittivity(relative_permittivity)
     # CHANGE TO MULTI BAND WHEN FINISHED:
     charge_density_ = charge_density_single_band(q, x, wavefunction,
                                                  volume_density)
