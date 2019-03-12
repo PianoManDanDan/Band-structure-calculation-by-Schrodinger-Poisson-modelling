@@ -50,6 +50,9 @@ def anderson(growth_axis, material_list, material_thickness):
     for i in range(len(dV)):
         V[growth_axis >= cum_thickness[i]] = dV[i]
 
+    if material_list[0].name == material_list[-1].name:
+        V[growth_axis >= cum_thickness[-2]] = V[0]
+
     V *= constants.eV
     return V
 
@@ -63,7 +66,7 @@ if __name__ == '__main__':
     # mat_list = [materials.GaAs(10), materials.InSb(10),
     #             materials.InP(10), materials.GaAs(10)]
     # mat_list = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
-                # materials.GaAs(10), materials.AlGaAs(0.2, 10)]
+    #               materials.GaAs(10), materials.AlGaAs(0.2, 10)]
     thickness = np.array([10, 10, 10, 10]) * 1e-9
 
     x = np.linspace(0, sum(thickness), 1000)
