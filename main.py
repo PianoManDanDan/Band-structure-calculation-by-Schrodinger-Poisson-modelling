@@ -193,6 +193,7 @@ class Window:
                                    padx=5, pady=5)
         self.go_button.grid(row=4, column=4, columnspan=4)
 
+        # RIGHT HAND SIDE
         self.RHS = tk.Frame(self.root)
         self.RHS.grid(row=0, column=1, sticky='news')
 
@@ -206,16 +207,44 @@ class Window:
         self.figure.set_ylabel('E (eV)')
         self.figure.grid()
         self.plot = FigureCanvasTkAgg(fig, master=self.RHS)
-        self.plot.get_tk_widget().grid(row=1, column=0, sticky='nesw',
+        self.plot.get_tk_widget().grid(row=1, column=0,
+                                       columnspan=5, sticky='nesw',
                                        padx=10, pady=(0, 10))
+
         self.toolbar_frame = tk.Frame(master=self.RHS)
-        self.toolbar_frame.grid(row=0, column=0, padx=10, pady=(10, 0),
-                                sticky='news')
+        self.toolbar_frame.grid(row=0, column=0, columnspan=5,
+                                padx=10, pady=(10, 5), sticky='news')
         self.toolbar = NavigationToolbar2Tk(self.plot,
                                             self.toolbar_frame)
         self.toolbar.update()
-        self.toolbar.grid(row=0, column=0, sticky='news')
+        self.toolbar.grid(row=0, column=0, sticky='ew')
+
         self.plot.draw()
+
+        # Add navigation buttons
+        self.navigation_frame = tk.Frame(master=self.RHS)
+        self.navigation_frame.grid(row=2, column=0, padx=10, pady=10,
+                                sticky='ns')
+
+        self.first_button = tk.Button(self.navigation_frame,
+                                      command=self.first, text='<<',
+                                      state='disabled', padx=3, pady=3)
+        self.first_button.grid(row=0, column=0, padx=5, pady=5)
+        self.prev_button = tk.Button(self.navigation_frame,
+                                     command=self.previous, text='<',
+                                     state='disabled', padx=6, pady=3)
+        self.prev_button.grid(row=0, column=1, padx=5, pady=5)
+        self.plot_count_label = tk.Label(self.navigation_frame,
+                                         text='0 / 0')
+        self.plot_count_label.grid(row=0, column=2, padx=5, pady=5)
+        self.next_button = tk.Button(self.navigation_frame,
+                                     command=self.next, text='>',
+                                     state='disabled', padx=6, pady=3)
+        self.next_button.grid(row=0, column=3, padx=5, pady=5)
+        self.last_button = tk.Button(self.navigation_frame,
+                                     command=self.last, text='>>',
+                                     state='disabled', padx=3, pady=3)
+        self.last_button.grid(row=0, column=4, padx=5, pady=5)
 
         # mainloop
         self.root.mainloop()
@@ -611,6 +640,8 @@ class Window:
         self.me = np.zeros_like(self.x)
         for i in range(self.num_materials):
             self.me[self.x >= cum_thickness[i]] = float(self.me_entry[i].get())
+
+        self.me = np.ones_like(self.me) * min(self.me)
         self.me *= constants.m_e
 
         # Make array of heavy hole mass
@@ -668,7 +699,7 @@ class Window:
         # Plot potential to plotting window.
         self.figure.cla()
         self.figure.plot(self.x / 1e-9, self.V / constants.eV, 'k')
-        self.figure.set_xlabel('x (nm)')
+        self.figure.set_xlabel('Growth axis (nm)')
         self.figure.set_ylabel('E (eV)')
         self.figure.grid()
         self.plot.draw()
@@ -697,7 +728,7 @@ class Window:
         while num_plotted < self.N_states:
             if self.eigvals[i] > max(self.V):
                 break
-            if self.eigvals[i] < 0:
+            if self.eigvals[i] < min(self.V):
                 i += 1
                 continue
             self.figure.plot(self.x / 1e-9,
@@ -705,10 +736,51 @@ class Window:
                              label=r'$\psi_{0}$'.format(num_plotted))
             num_plotted += 1
             i += 1
-        self.figure.legend(loc='best')
+
+        self.figure.legend(loc=1).set_draggable(state=True)
+        self.plot.draw()
+
+        self.first_button.configure(state='normal')
+        self.prev_button.configure(state='normal')
+        self.next_button.configure(state='normal')
+        self.last_button.configure(state='normal')
+        self.plot_count_label.configure(text='1 / 1')
+
+        return
+
+    def first(self):
+        """
+        Shows first potential and wavefunctions in plotting window.
+        """
+        pass
+
+    def previous(self):
+        """
+        Shows previous potential and wavefunctions in plotting window.
+        """
+        pass
+
+    def next(self):
+        """
+        Shows next potential and wavefunctions in plotting window.
+        """
+
+        self.V = sp.poisson()
+
+        # plot new V
+        self.figure.cla()
+        self.figure.grid()
+        self.figure.set_xlabel('Growth axis (nm)')
+        self.figure.set_ylabel('E (eV)')
         self.plot.draw()
 
         return
+
+    def last(self):
+        """
+        Shows last potential and wavefunctions in plotting window.
+        """
+        pass
 
 
 if __name__ == '__main__':
