@@ -111,9 +111,9 @@ def energy_eigenvalues(x, V, m=None, hbar=constants.hbar):
                              'length')
 
     M = _M(x, V, m, hbar)
-    eigenvalues = LA.eigvalsh(M, UPLO='U')
+    eigenvalues = LA.eigvals(M)
 
-    return eigenvalues
+    return eigenvalues.sort()
 
 
 def wavefunctions(x, V, m=None, hbar=constants.hbar):
@@ -152,7 +152,11 @@ def wavefunctions(x, V, m=None, hbar=constants.hbar):
                              'length')
 
     M = _M(x, V, m, hbar)
-    _, eigenvectors = LA.eigh(M, UPLO='U')
+    eigenvalues, eigenvectors = LA.eig(M)
+
+    # sort eigenvectors into ascending order
+    idx = eigenvalues.argsort()
+    eigenvectors = eigenvectors[:, idx]
 
     # Uncomment if eigvectors need flipping
     # for i in range(len(x)):
@@ -201,7 +205,12 @@ def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
                              'length')
 
     M = _M(x, V, m, hbar)
-    eigenvalues, eigenvectors = LA.eigh(M, UPLO='U')
+    eigenvalues, eigenvectors = LA.eig(M)
+
+    # sort eigenvalues and eigenvectors into ascending order
+    idx = eigenvalues.argsort()
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:, idx]
 
     # Uncomment if eigvectors need flipping
     # for i in range(len(x)):
@@ -252,7 +261,7 @@ if __name__ == '__main__':
     """OVERLAP INTEGRAL - CONST MASS VS VARYING MASS"""
     import materials
     from anderson import anderson
-    x = np.linspace(0, 30e-9, 1000)
+    x = np.linspace(0, 30e-9, 100)
     mat = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
            materials.AlGaAs(0.2, 10)]
     V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8]))
@@ -273,10 +282,13 @@ if __name__ == '__main__':
     plt.plot(x / 1e-9, (eigvect_const[:, 1] + eigval_const[1] / constants.eV))
     plt.plot(x / 1e-9, (eigvect_const[:, 2] + eigval_const[2] / constants.eV))
     plt.gca().set_prop_cycle(None)
-    plt.plot(x / 1e-9, eigvect_change[:, 1] + eigval_change[1] / constants.eV,
+    plt.plot(x / 1e-9, eigvect_change[:, 0] + eigval_change[0] /
+             constants.eV,
              '--', label='changing mass')
-    plt.plot(x / 1e-9, eigvect_change[:, 2] + eigval_change[2] / constants.eV, '--')
-    plt.plot(x / 1e-9, eigvect_change[:, 3] + eigval_change[3] / constants.eV, '--')
+    plt.plot(x / 1e-9, eigvect_change[:, 1] + eigval_change[1] /
+             constants.eV, '--')
+    plt.plot(x / 1e-9, eigvect_change[:, 2] + eigval_change[2] /
+             constants.eV, '--')
 
     plt.legend(loc=1)
 
@@ -285,7 +297,7 @@ if __name__ == '__main__':
     # plt.show()
 
     for i in range(4):
-        top = np.trapz(eigvect_const[:, i]*eigvect_change[:, i+1], x)
+        top = np.trapz(eigvect_const[:, i]*eigvect_change[:, i], x)
         bottom = np.trapz(eigvect_const[:, i]**2, x)
         print(f'Integral overlap {i+1} = {top/bottom:.3g}')
 
@@ -318,13 +330,13 @@ if __name__ == '__main__':
     import materials
     from anderson import anderson
 
-    x = np.linspace(0, 40e-9, 1000)
+    x = np.linspace(0, 40e-9, 100)
     mat = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
            materials.InAs(10), materials.AlGaAs(0.2, 10)]
     V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8, 1e-8]))
 
     m_const = np.ones_like(x) * 0.023 * constants.m_e
-    # m_const = np.ones_like(x) *(0.063 + 0.083 *0.2) * constants.m_e
+    m_const = np.ones_like(x) *(0.063 + 0.083 *0.2) * constants.m_e
     m_change = np.ones_like(x) * (0.063 + 0.083 * 0.2)
     m_change[x >= 10e-9] = 0.063
     m_change[x >= 20e-9] = 0.023
@@ -345,19 +357,92 @@ if __name__ == '__main__':
     # plt.plot(x/1e-9, eigvect_const[:,6] + eigval_const[6]/constants.eV)
     plt.gca().set_prop_cycle(None)
 
-    plt.plot(x/1e-9, eigvect_change[:,2] + eigval_change[
-        2]/constants.eV,
+    plt.plot(x/1e-9, eigvect_change[:,0] + eigval_change[
+        0]/constants.eV,
              '--', label='change')
+    plt.plot(x / 1e-9, eigvect_change[:,1] + eigval_change[
+        1]/constants.eV,
+             '--')
+    plt.plot(x / 1e-9, eigvect_change[:,2] + eigval_change[
+        2]/constants.eV,
+             '--')
     plt.plot(x / 1e-9, eigvect_change[:,3] + eigval_change[
         3]/constants.eV,
              '--')
-    plt.plot(x / 1e-9, eigvect_change[:,4] + eigval_change[
-        4]/constants.eV,
-             '--')
-    plt.plot(x / 1e-9, eigvect_change[:,5] + eigval_change[
-        5]/constants.eV,
-             '--')
     plt.legend(loc='best')
+
+    """Small changes in mass"""
+    x = np.linspace(0, 30e-9, 100)
+    mat = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
+           materials.AlGaAs(0.2, 10)]
+    V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8]))
+
+    m_const = np.ones_like(x) * (0.063) * constants.m_e
+    m_change = np.ones_like(x) * (0.063 + 0.01)
+    m_change[x >= 10e-9] = 0.063
+    m_change[x >= 20e-9] = (0.063 + 0.01)
+    m_change *= constants.m_e
+
+    eigval_const, eigvect_const = solve_schrodinger(x, V, m_const)
+    eigval_change, eigvect_change = solve_schrodinger(x, V, m_change)
+
+    plt.figure()
+    plt.plot(x / 1e-9, V / constants.eV, 'k')
+    plt.plot(x / 1e-9,
+             (eigvect_const[:, 0] + eigval_const[0] / constants.eV),
+             label='const mass')
+    plt.plot(x / 1e-9,
+             (eigvect_const[:, 1] + eigval_const[1] / constants.eV))
+    plt.plot(x / 1e-9,
+             (eigvect_const[:, 2] + eigval_const[2] / constants.eV))
+    plt.gca().set_prop_cycle(None)
+    plt.plot(x / 1e-9,
+             eigvect_change[:, 0] + eigval_change[0] / constants.eV,
+             '--', label='changing mass')
+    plt.plot(x / 1e-9,
+             eigvect_change[:, 1] + eigval_change[1] / constants.eV,
+             '--')
+    plt.plot(x / 1e-9,
+             eigvect_change[:, 2] + eigval_change[2] / constants.eV,
+             '--')
+    plt.title('small dV')
+
+    plt.legend(loc=1)
+
+    plt.xlabel('z (nm)')
+    plt.ylabel('E (eV)')
+
+
+
+    # """LA.eig test"""
+    # import materials
+    # from anderson import anderson
+    # x = np.linspace(0, 30e-9, 1000)
+    # mat = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
+    #        materials.AlGaAs(0.2, 10)]
+    # V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8]))
+    #
+    # m_const = np.ones_like(x) * 0.063 * constants.m_e
+    # m_change = np.ones_like(x) * (0.063 + 0.083 * 0.2)
+    # m_change[x >= 10e-9] = 0.063
+    # m_change[x >= 20e-9] = (0.063 + 0.083 * 0.2)
+    # m_change *= constants.m_e
+    #
+    #
+    # eigval_const, eigvect_const = solve_schrodinger(x, V, m_const)
+    # eigval_change, eigvect_change = solve_schrodinger(x, V, m_change)
+    #
+    #
+    # plt.figure()
+    # plt.plot(x / 1e-9, V / constants.eV, 'k')
+    #
+    # for i in range(3):
+    #     plt.plot(x / 1e-9, eigvect_const[:, i] + eigval_const[i] /
+    #          constants.eV)
+    # plt.gca().set_prop_cycle(None)
+    # for i in range(3):
+    #     plt.plot(x / 1e-9, eigvect_change[:, i] + eigval_change[i] /
+    #              constants.eV)
 
 
     plt.show()
