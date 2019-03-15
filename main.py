@@ -684,6 +684,17 @@ class Window:
         if self.thickness_entry[-1].get() == '':
             raise ValueError('Final layer must have a thickness')
 
+        # Check to ensure first material is same as last material
+        if self.materials_dropdown[-1].get() != self.materials_dropdown[0].get():
+            self.add_layer()
+            self.materials_dropdown[-1].set(self.materials_dropdown[0].get())
+            if self.materials_dropdown[-1].get() == \
+                    u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs':
+                self.x_entry[-1].configure(state='normal')
+                self.x_entry[-1].insert(0, self.x_entry[0].get())
+            self.insert_parameters(1)
+            self.thickness_entry[-1].insert(0, self.thickness_entry[0].get())
+
         # Set parameters from entry boxes
         self.set_parameters()
 
