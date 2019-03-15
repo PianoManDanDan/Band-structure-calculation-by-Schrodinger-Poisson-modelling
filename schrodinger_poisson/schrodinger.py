@@ -212,10 +212,10 @@ def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
     eigenvalues = eigenvalues[idx]
     eigenvectors = eigenvectors[:, idx]
 
-    # Uncomment if eigvectors need flipping
-    # for i in range(len(x)):
-    #     if eigenvectors[0, i] > eigenvectors[1, i]:
-    #         eigenvectors[:, i] *= -1
+    # comment if eigvectors don't need flipping
+    for i in range(len(x)):
+        if eigenvectors[0, i] > eigenvectors[1, i]:
+            eigenvectors[:, i] *= -1
 
     return eigenvalues, eigenvectors
 
@@ -308,25 +308,7 @@ if __name__ == '__main__':
               f'{abs(eigval_const[i] - eigval_change[i+1])/constants.eV:.3f}\t'
               f'{eigval_change[i+1]/eigval_const[i]:.3f}')
 
-
-    # Determine x**2 dependence? Straight line if direct x**2 dependence
-    # plt.figure()
-    # plt.loglog(eigval_const, label='Constant mass')
-    # plt.loglog(eigval_change[1:], label='Changing mass') # ignore E[0]
-    # plt.ylabel('log(E)')
-    # plt.title('All E states')
-    # plt.grid()
-    # plt.legend(loc='best')
-    # States in well - only 3 points so kind of useless
-    # plt.figure()
-    # plt.loglog(eigval_const[:4], label='Constant mass')
-    # plt.loglog(eigval_change[1:5], label='Changing mass')
-    # plt.ylabel('log(E)')
-    # plt.title('E states < max(V)')
-    # plt.grid()
-    # plt.legend(loc='best')
-
-    """No wavefunc in well test - changing mass has weird effects"""
+    """Big discontinuities test"""
     import materials
     from anderson import anderson
 
@@ -336,7 +318,7 @@ if __name__ == '__main__':
     V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8, 1e-8]))
 
     m_const = np.ones_like(x) * 0.023 * constants.m_e
-    m_const = np.ones_like(x) *(0.063 + 0.083 *0.2) * constants.m_e
+    # m_const = np.ones_like(x) *(0.063 + 0.083 *0.2) * constants.m_e
     m_change = np.ones_like(x) * (0.063 + 0.083 * 0.2)
     m_change[x >= 10e-9] = 0.063
     m_change[x >= 20e-9] = 0.023
@@ -372,77 +354,44 @@ if __name__ == '__main__':
     plt.legend(loc='best')
 
     """Small changes in mass"""
-    x = np.linspace(0, 30e-9, 100)
-    mat = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
-           materials.AlGaAs(0.2, 10)]
-    V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8]))
-
-    m_const = np.ones_like(x) * (0.063) * constants.m_e
-    m_change = np.ones_like(x) * (0.063 + 0.01)
-    m_change[x >= 10e-9] = 0.063
-    m_change[x >= 20e-9] = (0.063 + 0.01)
-    m_change *= constants.m_e
-
-    eigval_const, eigvect_const = solve_schrodinger(x, V, m_const)
-    eigval_change, eigvect_change = solve_schrodinger(x, V, m_change)
-
-    plt.figure()
-    plt.plot(x / 1e-9, V / constants.eV, 'k')
-    plt.plot(x / 1e-9,
-             (eigvect_const[:, 0] + eigval_const[0] / constants.eV),
-             label='const mass')
-    plt.plot(x / 1e-9,
-             (eigvect_const[:, 1] + eigval_const[1] / constants.eV))
-    plt.plot(x / 1e-9,
-             (eigvect_const[:, 2] + eigval_const[2] / constants.eV))
-    plt.gca().set_prop_cycle(None)
-    plt.plot(x / 1e-9,
-             eigvect_change[:, 0] + eigval_change[0] / constants.eV,
-             '--', label='changing mass')
-    plt.plot(x / 1e-9,
-             eigvect_change[:, 1] + eigval_change[1] / constants.eV,
-             '--')
-    plt.plot(x / 1e-9,
-             eigvect_change[:, 2] + eigval_change[2] / constants.eV,
-             '--')
-    plt.title('small dV')
-
-    plt.legend(loc=1)
-
-    plt.xlabel('z (nm)')
-    plt.ylabel('E (eV)')
-
-
-
-    # """LA.eig test"""
-    # import materials
-    # from anderson import anderson
-    # x = np.linspace(0, 30e-9, 1000)
+    # x = np.linspace(0, 30e-9, 100)
     # mat = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
     #        materials.AlGaAs(0.2, 10)]
     # V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8]))
     #
-    # m_const = np.ones_like(x) * 0.063 * constants.m_e
-    # m_change = np.ones_like(x) * (0.063 + 0.083 * 0.2)
+    # m_const = np.ones_like(x) * (0.063) * constants.m_e
+    # m_change = np.ones_like(x) * (0.063 + 0.01)
     # m_change[x >= 10e-9] = 0.063
-    # m_change[x >= 20e-9] = (0.063 + 0.083 * 0.2)
+    # m_change[x >= 20e-9] = (0.063 + 0.01)
     # m_change *= constants.m_e
-    #
     #
     # eigval_const, eigvect_const = solve_schrodinger(x, V, m_const)
     # eigval_change, eigvect_change = solve_schrodinger(x, V, m_change)
     #
-    #
     # plt.figure()
     # plt.plot(x / 1e-9, V / constants.eV, 'k')
-    #
-    # for i in range(3):
-    #     plt.plot(x / 1e-9, eigvect_const[:, i] + eigval_const[i] /
-    #          constants.eV)
+    # plt.plot(x / 1e-9,
+    #          (eigvect_const[:, 0] + eigval_const[0] / constants.eV),
+    #          label='const mass')
+    # plt.plot(x / 1e-9,
+    #          (eigvect_const[:, 1] + eigval_const[1] / constants.eV))
+    # plt.plot(x / 1e-9,
+    #          (eigvect_const[:, 2] + eigval_const[2] / constants.eV))
     # plt.gca().set_prop_cycle(None)
-    # for i in range(3):
-    #     plt.plot(x / 1e-9, eigvect_change[:, i] + eigval_change[i] /
-    #              constants.eV)
+    # plt.plot(x / 1e-9,
+    #          eigvect_change[:, 0] + eigval_change[0] / constants.eV,
+    #          '--', label='changing mass')
+    # plt.plot(x / 1e-9,
+    #          eigvect_change[:, 1] + eigval_change[1] / constants.eV,
+    #          '--')
+    # plt.plot(x / 1e-9,
+    #          eigvect_change[:, 2] + eigval_change[2] / constants.eV,
+    #          '--')
+    # plt.title('small dV')
+    #
+    # plt.legend(loc=1)
+    # plt.xlabel('z (nm)')
+    # plt.ylabel('E (eV)')
 
 
     plt.show()
