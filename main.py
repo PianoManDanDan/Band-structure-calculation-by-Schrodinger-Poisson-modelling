@@ -640,8 +640,6 @@ class Window:
         self.me = np.zeros_like(self.x)
         for i in range(self.num_materials):
             self.me[self.x >= cum_thickness[i]] = float(self.me_entry[i].get())
-
-        self.me = np.ones_like(self.me) * min(self.me)
         self.me *= constants.m_e
 
         # Make array of heavy hole mass
