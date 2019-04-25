@@ -4,10 +4,12 @@ This research project was done as part of my masters year at Cardiff University.
 
 ### Dependecies:
 
-- Python 3 (v3.7.0 was used in development) - While efforts have been made to ensure this is compatible with Python 2, it has not been tested so may not work as intended.
+- Python 3 (v3.7.0 was used in development)
 - [Numpy Library](http://www.numpy.org/) (v1.15.2 was used in development)
 - [Matplotlib Library](https://matplotlib.org/) (v1.1.0 was used in development)
 - [Scipy Library](https://www.scipy.org/) (v3.0.0 was used in development)
+
+While efforts have been made to ensure this is compatible with Python 2, it has not been tested so may not work as intended.
 
 ### How to use
 
