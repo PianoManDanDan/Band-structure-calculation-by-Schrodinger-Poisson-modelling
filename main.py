@@ -346,6 +346,8 @@ class Window:
 
         try:
             float(value_if_allowed)
+            if float(value_if_allowed) < 0:
+                return False
             return True
         except ValueError:
             return False
