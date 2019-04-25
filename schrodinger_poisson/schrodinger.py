@@ -294,13 +294,13 @@ def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
             raise ValueError('array x and array m must have same '
                              'length')
 
-    # M = _M(x, V, m, hbar)
+    M = _M(x, V, m, hbar)
     # M = myMatrix1(x, V, m, hbar)
     # M = myMatrix2(x, V, m, hbar)
     # M = myMatrix3(x, V, m, hbar)
     # M = myMatrix4(x, V, m, hbar)
-    M = TristanMatrix(x, V, m, hbar)
-    eigenvalues, eigenvectors = LA.eig(M)
+    # M = TristanMatrix(x, V, m, hbar)
+    eigenvalues, eigenvectors = LA.eigh(M)
 
     # sort eigenvalues and eigenvectors into ascending order
     idx = eigenvalues.argsort()
@@ -312,7 +312,7 @@ def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
         if eigenvectors[0, i] > eigenvectors[1, i]:
             eigenvectors[:, i] *= -1
 
-    return eigenvalues, eigenvectors
+    return eigenvalues.real, eigenvectors.real
 
 
 
@@ -323,18 +323,20 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     """DEGENERATE STATES PRESENT"""
-    # x = np.linspace(-1e-8, 1e-8, 1000)
-    # V = np.ones_like(x) * 1.6e-19 * 200e-3
-    # V[abs(x) < 6e-9] = 0
-    # V[abs(x) < 2e-9] = 1.6e-19 * 100e-3
-    #
-    # eigval, eigvect = solve_schrodinger(x, V)
-    # plt.figure()
-    # plt.plot(x/1e-9, ((eigvect[:,0:5])*0.5e-19 + eigval[:5])/constants.eV)
-    # plt.plot(x/1e-9, V/constants.eV, 'k')
-    # plt.xlabel('z (nm)')
-    # plt.ylabel('E (eV)')
-    # plt.show()
+    x = np.linspace(-1e-8, 1e-8, 1000)
+    V = np.ones_like(x) * 1.6e-19 * 200e-3
+    V[abs(x) < 6e-9] = 0
+    V[abs(x) < 2e-9] = 1.6e-19 * 100e-3
+
+    eigval, eigvect = solve_schrodinger(x, V)
+    print(eigval[:5] *1000/ constants.eV)
+    plt.figure()
+    plt.plot(x/1e-9, ((eigvect[:,0:5])*0.5e-19 + eigval[
+                                                 :5])*1000/constants.eV)
+    plt.plot(x/1e-9, V*1000/constants.eV, 'k')
+    plt.xlabel('z (nm)')
+    plt.ylabel('E (meV)')
+    plt.show()
 
     """QCL"""
     # x = np.linspace(-1e-8, 1e-8, 1000)
@@ -492,66 +494,119 @@ if __name__ == '__main__':
     # plt.xlabel('z (nm)')
     # plt.ylabel('E (eV)')
 
-    """Tristan Test"""
-    import materials
-    from anderson import anderson
+    """Cunha, Christansen 2017 test"""
+    # z = np.linspace(-np.pi/2, np.pi/2, 1000)
+    # # z = np.linspace(-1.2, 1.2, 1000)
+    # x = np.arccosh(1/np.cos(z))
+    # # x = np.linspace(-0.5, 0.5, 1000)
+    # Vx = np.zeros_like(x)
+    # Vz = 0.5 + 0.75*np.tan(z)**2
+    # mx = constants.m_e / np.cosh(x)**2
+    # mz = constants.m_e * np.cos(z)
+    #
+    #
+    # for n in range(1, 5):
+    #     analyticE = (constants.hbar / (2 * constants.m_e)) * (n * (n+1))
+    #     print(f'E_{n} = {analyticE * constants.eV:.3e} J')
+    # print('\n')
+    #
+    #
+    # evals, evects = solve_schrodinger(x, Vx, mx)
+    #
+    # plt.figure()
+    # plt.plot(x[x<0.5], Vx[x<0.5], 'k')
+    # for i in range(3):
+    #     plt.plot(x[x<0.5], evals[i] + evects[x<0.5,i])
+    #     print(f'Calc E_{i+1} = {evals[i]:.3e} eV')
+    # plt.grid()
 
-    x = np.linspace(0, 50e-9, 1000)
-    mat = [materials.AlGaAs(0.3, 10), materials.GaAs(10),
-           materials.AlGaAs(0.3, 10)]
-    V = np.ones_like(x) * 0.21 * constants.eV
-    V[abs(x - 25e-9) < 3e-9] = 0
 
-    m = np.ones_like(x) * (0.063 + 0.083 * 0.3)
-    m[x >= 22e-9] = 0.063
-    m[x >= 28e-9] = (0.063 + 0.083 * 0.3)
-    m *= constants.m_e
 
-    eigval, eigvect = solve_schrodinger(x, V, m)
+    # z = np.linspace(-np.pi/2, np.pi/2, 1000)
+    # # z = np.linspace(-1.2, 1.2, 1000)
+    # x = np.arccosh(1/np.cos(z))
+    # # x = np.linspace(-0.5, 0.5, 1000)
+    # Vx = - (3 * constants.hbar**2 / (8 * constants.m_e)) * np.sinh(
+    #     x)**2 - constants.hbar**2 / (4 * constants.m_e)
+    # Vz = - (3 * constants.hbar**2 / (8 * constants.m_e)) * np.tan(
+    #     z)**2 - constants.hbar**2 / (4 * constants.m_e)
+    # mx = constants.m_e / np.cosh(x)**2
+    # mz = constants.m_e * np.cos(z)
+    #
+    # for n in range(1, 5):
+    #     analyticE = (constants.hbar**2 * np.pi**2 / (8 * constants.m_e)) * n**2
+    #     print(f'E_{n} = {analyticE * constants.eV:.3e} J')
+    # print('\n')
+    #
+    #
+    # evals, evects = solve_schrodinger(z, Vz, mz)
+    #
+    # plt.figure()
+    # plt.plot(z, Vz, 'k')
+    # for i in range(3):
+    #     plt.plot(z, evals[i] + evects[:,i])
+    #     print(f'Calc E_{i+1} = {evals[i]:.3e} eV')
+    # plt.grid()
 
-    print(f'E_21 = {(eigval[1] - eigval[0]) / constants.eV}\n')
+    """Analytic vs matrix"""
+    # def E_n(n, L):
+    #     top = n**2 * np.pi**2 * constants.hbar**2
+    #     bottom = 2 * constants.m_e *L**2
+    #     return top / bottom
+    #
+    # L = 10e-9
+    #
+    # analytic = np.zeros(5)
+    # for i in range(5):
+    #     analytic[i] = E_n(i+1, L)
+    # analytic /= (constants.eV * 1e-3)
+    #
+    # x = np.linspace(0, L, 1000)
+    # V = np.zeros_like(x)
+    # m = np.ones_like(x) * constants.m_e
+    # evals, evects = solve_schrodinger(x, V, m)
+    # evals /= (constants.eV * 1e-3)
+    #
+    # print(f'Anal\tMatr\tdE')
+    # for i in range(5):
+    #     print(f'{analytic[i]:.3f}\t{evals[i]:.3f}\t'
+    #           f'{abs(analytic[i] - evals[i]):.3f}')
+    #
+    # plt.figure()
+    # plt.plot(x, V, 'k')
+    # for i in range(5):
+    #     plt.plot(x, evects[:,i]*1.2e2 + evals[i])
+
+    """Parabolic Well"""
+    def E_n(n, omega):
+        return (n+0.5) * constants.hbar * omega
+
+    omega = np.sqrt(1 / constants.m_e)
+
+    analytic = np.zeros(5)
+    for i in range(5):
+        analytic[i] = E_n(i, omega)
+    analytic /= constants.eV
+
+    x = np.linspace(0, 3e-9, 1000)
+    V = 0.5 * omega**2 * constants.m_e * (x-max(x)/2)**2
+    m = np.ones_like(x) * constants.m_e
+    evals, evects = solve_schrodinger(x, V, m)
+    evals /= constants.eV
+
+    print(f'Anal\tMatr\tdE')
+    for i in range(5):
+        print(f'{analytic[i]:.3f}\t{evals[i]:.3f}\t'
+              f'{(analytic[i] - evals[i])*1000:.3f}')
+
     plt.figure()
-    plt.plot(x / 1e-9, V / constants.eV, 'k')
-    plt.plot(x / 1e-9, (eigvect[:, 0] + eigval[0] / constants.eV),
-             label='$\psi_1$')
-    plt.plot(x / 1e-9, (eigvect[:, 1] + eigval[1] / constants.eV),
-             label='$\psi_2$')
+
+    plt.plot(x[V<3.5*constants.eV]/1e-9,
+             V[V<3.5*constants.eV]/constants.eV, 'k')
+    for i in range(5):
+        plt.plot(x/1e-9, evects[:,i] + evals[i])
 
     plt.grid()
-    plt.legend()
-    plt.legend(loc=1)
-    plt.xlabel('z (nm)')
+    plt.xlabel('x (nm)')
     plt.ylabel('E (eV)')
-
-
-
-
-    x = np.linspace(0, 50e-9, 1000)
-    mat = [materials.AlGaAs(0.3, 10), materials.GaAs(10),
-           materials.AlGaAs(0.3, 10)]
-    V = np.ones_like(x) * 0.21 * constants.eV
-    V[abs(x-25e-9) < 9e-9] = 0
-
-    m = np.ones_like(x) * (0.063 + 0.083 * 0.3)
-    m[x >= 16e-9] = 0.063
-    m[x >= 34e-9] = (0.063 + 0.083 * 0.3)
-    m *= constants.m_e
-
-    eigval, eigvect = solve_schrodinger(x, V, m)
-
-    print(f'E_21 = {(eigval[1] - eigval[0]) / constants.eV}\n')
-    plt.figure()
-    plt.plot(x / 1e-9, V / constants.eV, 'k')
-    plt.plot(x / 1e-9, (eigvect[:, 0] + eigval[0] / constants.eV),
-             label='$\psi_1$')
-    plt.plot(x / 1e-9, (eigvect[:, 1] + eigval[1] / constants.eV),
-             label='$\psi_2$')
-
-    plt.grid()
-    plt.legend()
-    plt.legend(loc=1)
-    plt.xlabel('z (nm)')
-    plt.ylabel('E (eV)')
-
-
     plt.show()
