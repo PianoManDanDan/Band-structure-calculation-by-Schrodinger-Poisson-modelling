@@ -17,6 +17,8 @@ class AlGaAs:
     -----------
     name: string
           Name of class
+    x: float
+       Proportion of Al in sample (between 0 and 1 inclusive)
     dielectric_constant: float
                          dielectric constant of material (units?)
     me: float
@@ -58,6 +60,7 @@ class AlGaAs:
 
         self.name = 'AlGaAs'
 
+        self.x = x
         self.dielectric_constant = 12.9 - 2.84*x
         self.mlh = 0.082 + 0.068*x
         self.mhh = 0.51 + 0.25*x
@@ -143,7 +146,7 @@ class AlAs:
                       Material lattice constant (A)
     """
 
-    def __init__(self, x, T):
+    def __init__(self, T):
         """
         Sets up properties for AlAs.
 
