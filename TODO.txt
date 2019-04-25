@@ -17,7 +17,7 @@ main.py
 	- Make schrodinger function to make electron mass array and solve schrodinger
 - On plotting window, get tight_layout working. If infinite potential, ylabel goes
   off the left edge of the plotting window. tight_layout() should work, but not.
-
+- What happens if Custom is selected?? Check!!
 
 =====================================================================================
 ./schrodinger_poisson/__init__.py
