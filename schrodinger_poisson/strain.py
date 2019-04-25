@@ -28,9 +28,12 @@ def strain(material_list):
     """
 
     for i in range(1, len(material_list)):
-        mat_strain = material_list[i].lattice_constant / \
-                     material_list[i-1].lattice_constant
-        if mat_strain > 1.05 or mat_strain < 0.95:
+        mat_strain = material_list[i-1].lattice_constant - \
+                     material_list[i].lattice_constant
+        mat_strain /= material_list[i].lattice_constant
+        mat_strain *= 100 # To give as percentage
+
+        if abs(mat_strain) > 5:
             messagebox.showwarning("Warning - Lattice mismatch found",
                                    "Lattice mismatch greater than 5% "
                                    "found between {0} and {1}. This "
