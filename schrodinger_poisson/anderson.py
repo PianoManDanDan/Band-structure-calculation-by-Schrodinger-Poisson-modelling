@@ -30,36 +30,64 @@ def anderson(growth_axis, material_list, material_thickness):
     ----
     V: Array of size N
        Potential profile from materials due to Anderson's Rule
+
+    ???
+    V2: Array of size N
+        Transition energy V...?
     """
 
     material_thickness = np.insert(material_thickness, 0, 0)
     cum_thickness = np.cumsum(material_thickness)
-    dV = np.ones(len(material_thickness)-1) * material_list[0].Eg / 2
+    Eg = [material_list[i].Eg for i in range(len(material_list))]
+    Eg = np.asarray(Eg)
 
     for i in range(1, len(material_list)):
         prev_mat = material_list[i-1]
         next_mat = material_list[i]
+
+        # Check if same material used twice in a row
+        if next_mat.name == prev_mat.name:
+            # Check if AlGaAs and check for different x values
+            if next_mat.name == 'AlGaAs' and next_mat.x != prev_mat.x:
+                continue
+
+            Eg[i] = Eg[i-1]
+            continue
+
+        # 66%/33% split if GaAs-AlGaAs boundary
         if prev_mat.name == 'AlGaAs' and next_mat.name == 'GaAs':
-            dV[i] = 0.34 * dV[i-1]
+            Eg[i] = Eg[i-1] * 0.33
         elif prev_mat.name == 'GaAs' and next_mat.name == 'AlGaAs':
-            dV[i] = dV[i-1] / 0.34
+            Eg[i] = Eg[i-1] / 0.33
         else:
-            dV[i] = dV[i-1] + (next_mat.Eg - prev_mat.Eg) / 2
+            pass
 
-    V = np.zeros_like(growth_axis)
+    dV = np.asarray([Eg[i] - Eg[0] for i in range(len(Eg))])
+    max_range = np.ptp(dV)
+
+    # dV2 = max_range / ()
+
+    V1 = np.zeros_like(growth_axis)
+    # V2 = np.zeros_like(growth_axis)
     for i in range(len(dV)):
-        V[growth_axis >= cum_thickness[i]] = dV[i]
+        V1[growth_axis >= cum_thickness[i]] = material_list[0].Eg + \
+                                              dV[i]
+        # V2[growth_axis >= cum_thickness[i]] = material_list[0].Eg + \
+        #                                       dV[i] - \
+        #                                       2 * material_list[i].Eg
 
-    if material_list[0].name == material_list[-1].name:
-        V[growth_axis >= cum_thickness[-2]] = V[0]
+    V1 *= constants.eV
+    # V2 *= constants.eV
+    return V1#, V2
+    """UNCOMMENT V2 CODE IF TRANSITION ENERGIES BEING DONE!!!"""
 
-    V *= constants.eV
-    return V
+
 
 
 if __name__ == '__main__':
     import materials
     import matplotlib.pyplot as plt
+    import time
 
     mat_list = [materials.AlGaAs(0.2, 10), materials.GaAs(10),
                 materials.InP(10), materials.AlGaAs(0.2, 10)]
@@ -71,9 +99,11 @@ if __name__ == '__main__':
 
     x = np.linspace(0, sum(thickness), 1000)
     V = anderson(x, mat_list, thickness)
+    # V1, V2 = anderson(x, mat_list, thickness)
 
     plt.figure()
-    plt.plot(x, V, 'k')
+    plt.plot(x / 1e-9, V / constants.eV, 'k')
+    # plt.plot(x / 1e-9, V2 / constants.eV, 'k')
     plt.grid()
     plt.show()
 
