@@ -53,6 +53,10 @@ class Window:
         self.N_states = None
         self.particle = None
         self.num_materials = 1
+        self.VB = None
+        self.V_VB = None
+        self.eigvals_VB = None
+        self.eigvects_VB = None
 
         self.reset_settings()
 
@@ -99,6 +103,19 @@ class Window:
                                     self.set_temperature)
         self.temperature_entry.grid(row=0, column=1)
 
+        # Valence Band tickbox
+        self.VB = tk.BooleanVar()
+        self.VB.set(False)
+        valence_band_label = tk.Label(temp_frame, text='Include '
+                                                       'Valence Band?')
+        valence_band_label.grid(row=0, column=2, padx=(20, 10), pady=5,
+                               sticky='n')
+        self.valence_band_tickbox = tk.Checkbutton(temp_frame,
+                                                   onvalue=True,
+                                                   offvalue=False,
+                                                   variable=self.VB)
+        self.valence_band_tickbox.grid(row=0, column=3)
+
         # Labels for adding in materials
         material_label = tk.Label(self.LHS, text='Material')
         material_label.grid(row=1, column=0, pady=10)
@@ -120,7 +137,8 @@ class Window:
         # Set material parameters
         self.material_choices = ['InSb', 'GaAs',
                                  u'Al\u2093Ga\u208d\u2081\u208b\u2093\u208eAs',
-                                 'InP', 'InAs', 'GaSb', 'Custom']
+                                 'AlAs', 'InP', 'InAs', 'GaSb',
+                                 'Custom']
 
         self.materials_dropdown = [ttk.Combobox(self.LHS,
                                                 state='disabled',
@@ -221,31 +239,6 @@ class Window:
 
         self.plot.draw()
 
-        # Add navigation buttons
-        self.navigation_frame = tk.Frame(master=self.RHS)
-        self.navigation_frame.grid(row=2, column=0, padx=10, pady=10,
-                                sticky='ns')
-
-        self.first_button = tk.Button(self.navigation_frame,
-                                      command=self.first, text='<<',
-                                      state='disabled', padx=3, pady=3)
-        self.first_button.grid(row=0, column=0, padx=5, pady=5)
-        self.prev_button = tk.Button(self.navigation_frame,
-                                     command=self.previous, text='<',
-                                     state='disabled', padx=6, pady=3)
-        self.prev_button.grid(row=0, column=1, padx=5, pady=5)
-        self.plot_count_label = tk.Label(self.navigation_frame,
-                                         text='0 / 0')
-        self.plot_count_label.grid(row=0, column=2, padx=5, pady=5)
-        self.next_button = tk.Button(self.navigation_frame,
-                                     command=self.next, text='>',
-                                     state='disabled', padx=6, pady=3)
-        self.next_button.grid(row=0, column=3, padx=5, pady=5)
-        self.last_button = tk.Button(self.navigation_frame,
-                                     command=self.last, text='>>',
-                                     state='disabled', padx=3, pady=3)
-        self.last_button.grid(row=0, column=4, padx=5, pady=5)
-
         # mainloop
         self.root.mainloop()
 
@@ -259,7 +252,7 @@ class Window:
         """Reset N_points and N_states to default settings"""
         self.N_points = 1000
         self.N_states = 5
-        self.particle = 'e'
+        self.particle = 'lh'
         return
 
     def adjust_settings(self):
@@ -279,7 +272,6 @@ class Window:
                 warnings.warn('Number of points not specified. '
                               'Defaulting to 1000 points',
                               SyntaxWarning, stacklevel=1)
-            print(particle.get())
             options_window.destroy()
             return
 
@@ -315,8 +307,8 @@ class Window:
         N_states_spinbox.grid(row=1, column=1, padx=5, sticky='ew')
 
         particle = tk.StringVar(options_window)
-        particle.set('e')
-        tk.Label(options_window, text='Particle:',
+        particle.set('lh')
+        tk.Label(options_window, text='Valence Band Particle:',
                  borderwidth=5).grid(row=2, column=0, rowspan=3,
                                      pady=5, sticky='n')
         e_radio = tk.Radiobutton(options_window, text='Electron',
@@ -713,6 +705,14 @@ class Window:
         self.figure.set_xlabel('Growth axis (nm)')
         self.figure.set_ylabel('E (eV)')
         self.figure.grid()
+
+        # Calculate Valence band V if box is ticked and plot VB
+        if self.VB.get() is True:
+            self.V_VB = sp.valence_band(self.V, self.x,
+                                        self.material_list,
+                                        self.thickness)
+            self.figure.plot(self.x / 1e-9, self.V_VB / constants.eV,
+                             'k')
         self.plot.draw()
 
 
@@ -731,7 +731,14 @@ class Window:
         # Calculate eigenvalues and eigenvectors for potential
         self.eigvals, self.eigvects = sp.solve_schrodinger(self.x,
                                                            self.V,
-                                                           particle)
+                                                           self.me)
+
+        # Calculate Valence Band states if applicable
+        if self.VB.get() is True:
+            self.eigvals_VB, self.eigvects_VB = \
+                sp.solve_schrodinger(self.x, -self.V_VB, particle)
+            self.eigvals_VB *= -1
+            self.eigvects_VB *= -1
 
         # Plot eigenvectors
         num_plotted = 0
@@ -743,56 +750,37 @@ class Window:
                 i += 1
                 continue
             self.figure.plot(self.x / 1e-9,
-                             self.eigvects[:, i] + self.eigvals[i] / constants.eV,
-                             label=r'$\psi_{0}$'.format(num_plotted))
+                             self.eigvects[:, i] +
+                             self.eigvals[i] / constants.eV,
+                             label=r'$E_{0:d}$ = {1:.2f}eV'.format(
+                                 num_plotted+1,
+                                 self.eigvals[i] / constants.eV))
             num_plotted += 1
             i += 1
+        leg_default = self.figure.legend(loc=1, title='Conduction Band')
+        leg_default.set_draggable(state=True)
 
-        self.figure.legend(loc=1).set_draggable(state=True)
-        self.plot.draw()
+        if self.VB.get() is True:
+            leg_default.set_draggable(state=False)
+            self.figure.set_prop_cycle(None)
 
-        self.first_button.configure(state='normal')
-        self.prev_button.configure(state='normal')
-        self.next_button.configure(state='normal')
-        self.last_button.configure(state='normal')
-        self.plot_count_label.configure(text='1 / 1')
+            for i in range(num_plotted):
+                self.figure.plot(self.x / 1e-9, self.eigvects_VB[:, i] +
+                                 self.eigvals_VB[i] / constants.eV)
 
-        return
+            leg_VB = self.figure.legend(loc=4, title='Valence Band')
+            i = 0
+            for text in leg_VB.texts:
+                text.set_text(r'$E_{0:d}$ = {1:.2f}eV'.format(i + 1,
+                              self.eigvals_VB[i] / constants.eV))
+                i += 1
+            leg_VB.set_draggable(state=True)
+            self.figure.add_artist(leg_default)
+            leg_default.set_draggable(state=True)
 
-    def first(self):
-        """
-        Shows first potential and wavefunctions in plotting window.
-        """
-        pass
-
-    def previous(self):
-        """
-        Shows previous potential and wavefunctions in plotting window.
-        """
-        pass
-
-    def next(self):
-        """
-        Shows next potential and wavefunctions in plotting window.
-        """
-
-        self.V = sp.poisson()
-
-        # plot new V
-        self.figure.cla()
-        self.figure.grid()
-        self.figure.set_xlabel('Growth axis (nm)')
-        self.figure.set_ylabel('E (eV)')
         self.plot.draw()
 
         return
-
-    def last(self):
-        """
-        Shows last potential and wavefunctions in plotting window.
-        """
-        pass
-
 
 if __name__ == '__main__':
     Window()
