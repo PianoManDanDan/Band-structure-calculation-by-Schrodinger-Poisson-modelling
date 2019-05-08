@@ -9,8 +9,8 @@ domain, x.
 
 __version__ = '0.1'
 __author__ = 'Daniel Martin'
-__all__ = ['_beta', '_M', 'energy_eigenvalues', 'wavefunctions',
-           'solve_schrodinger']
+__all__ = ['_beta', '_M', 'energy_eigenvalues', 'my_matrix',
+           'wavefunctions', 'solve_schrodinger']
 
 import numpy as np
 from numpy import linalg as LA
@@ -166,69 +166,7 @@ def wavefunctions(x, V, m=None, hbar=constants.hbar):
     return eigenvectors
 
 
-
-
-def myMatrix1(x, V, m, hbar=constants.hbar): ## Doesn't work
-
-    dx = abs(x[1] - x[0])
-
-    Ma = 1 / (dx**2 * m[:-1])
-    Mc = 1 / (dx**2 * np.append(m, m[-1])[2:])
-    Md_top = - hbar**2 * m - hbar**2 * np.append(m, m[-1])[1:] \
-             - 2 * dx**2 * m * np.append(m, m[-1])[1:] * V
-    Md_bottom = hbar**2 * dx**2 * m * np.append(m, m[-1])[1:]
-    Md = Md_top / Md_bottom
-
-    M = np.diagflat(Md) + np.diagflat(Mc, 1) + np.diagflat(Ma, -1)
-
-    return M * -hbar**2 / 2
-
-def myMatrix2(x, V, m, hbar=constants.hbar):
-
-    dx = abs(x[1] - x[0])
-
-    Ma = 1 / (dx**2 * m[1:])
-    Mc = 1 / (dx**2 * m[1:])
-    Md_top = - hbar**2 * m - hbar**2 * np.append(m, m[-1])[1:] - 2 * \
-             dx**2 * m * np.append(m, m[-1])[1:] * V
-    Md_bottom = hbar**2 * dx**2 * m * np.append(m, m[-1])[1:]
-    Md = Md_top / Md_bottom
-
-    M = np.diagflat(Md) + np.diagflat(Mc, 1) + np.diagflat(Ma, -1)
-
-    return M * -hbar**2 / 2
-
-def myMatrix3(x, V, m, hbar=constants.hbar): ## Doesn't work
-
-    dx = abs(x[1] - x[0])
-
-    Ma = 1 / (dx**2 * m[:-1])
-    Mc = 1 / (dx**2 * m[1:])
-    Md_top = - hbar**2 * m - hbar**2 * np.append(m, m[-1])[1:] - 2 * \
-             dx**2 * m * np.append(m, m[-1])[1:] * V
-    Md_bottom = hbar**2 * dx**2 * m * np.append(m, m[-1])[1:]
-    Md = Md_top / Md_bottom
-
-    M = np.diagflat(Md) + np.diagflat(Mc, 1) + np.diagflat(Ma, -1)
-
-    return M * -hbar**2 / 2
-
-def myMatrix4(x, V, m, hbar=constants.hbar): ## Doesn't work
-
-    dx = abs(x[1] - x[0])
-
-    Ma = 1 / (dx**2 * m[1:])
-    Mc = 1 / (dx**2 * np.append(m, m[-1])[2:])
-    Md_top = - hbar**2 * m - hbar**2 * np.append(m, m[-1])[1:] \
-             - 2 * dx**2 * m * np.append(m, m[-1])[1:] * V
-    Md_bottom = hbar**2 * dx**2 * m * np.append(m, m[-1])[1:]
-    Md = Md_top / Md_bottom
-
-    M = np.diagflat(Md) + np.diagflat(Mc, 1) + np.diagflat(Ma, -1)
-
-    return M * -hbar**2 / 2
-
-def TristanMatrix(x, V, m, hbar=constants.hbar):
+def my_matrix(x, V, m, hbar=constants.hbar):
     dx = abs(x[1] - x[0])
 
     Ma = 2*np.append(m, [m[-1]])[2:]*m[:-1]
@@ -252,8 +190,6 @@ def TristanMatrix(x, V, m, hbar=constants.hbar):
     M = np.diagflat(Md) + np.diagflat(Mc, 1) + np.diagflat(Ma, -1)
 
     return M * -hbar**2 / (4*dx**2)
-
-
 
 
 def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
@@ -294,13 +230,14 @@ def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
             raise ValueError('array x and array m must have same '
                              'length')
 
-    M = _M(x, V, m, hbar)
-    # M = myMatrix1(x, V, m, hbar)
-    # M = myMatrix2(x, V, m, hbar)
-    # M = myMatrix3(x, V, m, hbar)
-    # M = myMatrix4(x, V, m, hbar)
-    # M = TristanMatrix(x, V, m, hbar)
-    eigenvalues, eigenvectors = LA.eigh(M)
+    # Constant Mass:
+    # M = _M(x, V, m, hbar)
+    # eigenvalues, eigenvectors = LA.eigh(M)
+
+    # Position-Dependent Mass
+    M = my_matrix(x, V, m, hbar)
+    eigenvalues, eigenvectors = LA.eig(M)
+
 
     # sort eigenvalues and eigenvectors into ascending order
     idx = eigenvalues.argsort()
@@ -315,28 +252,28 @@ def solve_schrodinger(x, V, m=None, hbar=constants.hbar):
     return eigenvalues.real, eigenvectors.real
 
 
-
-
-
-
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
+    import time
 
     """DEGENERATE STATES PRESENT"""
-    x = np.linspace(-1e-8, 1e-8, 1000)
-    V = np.ones_like(x) * 1.6e-19 * 200e-3
-    V[abs(x) < 6e-9] = 0
-    V[abs(x) < 2e-9] = 1.6e-19 * 100e-3
-
-    eigval, eigvect = solve_schrodinger(x, V)
-    print(eigval[:5] *1000/ constants.eV)
-    plt.figure()
-    plt.plot(x/1e-9, ((eigvect[:,0:5])*0.5e-19 + eigval[
-                                                 :5])*1000/constants.eV)
-    plt.plot(x/1e-9, V*1000/constants.eV, 'k')
-    plt.xlabel('z (nm)')
-    plt.ylabel('E (meV)')
-    plt.show()
+    # x = np.linspace(-1e-8, 1e-8, 1000)
+    # V = np.ones_like(x) * 1.6e-19 * 200e-3
+    # V[abs(x) < 6e-9] = 0
+    # V[abs(x) < 2e-9] = 1.6e-19 * 100e-3
+    #
+    # eigval, eigvect = solve_schrodinger(x, V)
+    # print(eigval[:5] *1000/ constants.eV)
+    # plt.figure()
+    # for i in range(5):
+    #     plt.plot(x/1e-9, ((eigvect[:,i])*0.5e-19 + eigval[i])*1000/constants.eV,
+    #              label=f'E = {eigval[i]*1000/constants.eV:.2f}meV')
+    # plt.plot(x/1e-9, V*1000/constants.eV, 'k')
+    # plt.xlabel('z (nm)')
+    # plt.ylabel('E (meV)')
+    # plt.grid()
+    # plt.legend(loc='best')
+    # plt.show()
 
     """QCL"""
     # x = np.linspace(-1e-8, 1e-8, 1000)
@@ -360,54 +297,54 @@ if __name__ == '__main__':
     # plt.show()
 
     """OVERLAP INTEGRAL - CONST MASS VS VARYING MASS"""
-    # import materials
-    # from anderson import anderson
-    # x = np.linspace(0, 50e-9, 1000)
-    # mat = [materials.AlGaAs(0.5, 10), materials.GaAs(10),
-    #        materials.AlGaAs(0.5, 10)]
-    # V = anderson(x, mat, np.array([2e-8, 1e-8, 2e-8]))
-    #
-    # m_const = np.ones_like(x) * (0.063) * constants.m_e #+ 0.083*0.2) * constants.m_e
-    # m_change = np.ones_like(x) * (0.063 + 0.083*0.2)
-    # m_change[x >= 10e-9] = 0.063
-    # m_change[x >= 20e-9] = (0.063 + 0.083*0.2)
-    # m_change *= constants.m_e
-    #
-    # eigval_const, eigvect_const = solve_schrodinger(x, V, m_const)
-    # eigval_change, eigvect_change = solve_schrodinger(x, V, m_change)
-    #
-    # plt.figure()
-    # plt.plot(x/1e-9, V/constants.eV, 'k')
-    # plt.plot(x / 1e-9, (eigvect_const[:, 0] + eigval_const[0] / constants.eV),
-    #          label='const mass')
-    # plt.plot(x / 1e-9, (eigvect_const[:, 1] + eigval_const[1] / constants.eV))
-    # plt.plot(x / 1e-9, (eigvect_const[:, 2] + eigval_const[2] / constants.eV))
-    # plt.gca().set_prop_cycle(None)
-    # plt.plot(x / 1e-9, eigvect_change[:, 0] + eigval_change[0] /
-    #          constants.eV,
-    #          '--', label='changing mass')
-    # plt.plot(x / 1e-9, eigvect_change[:, 1] + eigval_change[1] /
-    #          constants.eV, '--')
-    # plt.plot(x / 1e-9, eigvect_change[:, 2] + eigval_change[2] /
-    #          constants.eV, '--')
-    #
-    # plt.legend(loc=1)
-    #
-    # plt.xlabel('z (nm)')
-    # plt.ylabel('E (eV)')
-    # # plt.show()
-    #
-    # for i in range(4):
-    #     top = np.trapz(eigvect_const[:, i]*eigvect_change[:, i], x)
-    #     bottom = np.trapz(eigvect_const[:, i]**2, x)
-    #     print(f'Integral overlap {i+1} = {top/bottom:.3g}')
-    #
-    # print('\nConst\tChange\tdE  \tchange/const')
-    # for i in range(3):
-    #     print(f'{eigval_const[i]/constants.eV:.3f}\t'
-    #           f'{eigval_change[i+1]/constants.eV:.3f}\t'
-    #           f'{abs(eigval_const[i] - eigval_change[i+1])/constants.eV:.3f}\t'
-    #           f'{eigval_change[i+1]/eigval_const[i]:.3f}')
+    import materials
+    from anderson import anderson
+    x = np.linspace(0, 30e-9, 1000)
+    mat = [materials.AlGaAs(0.5, 10), materials.GaAs(10),
+           materials.AlGaAs(0.5, 10)]
+    V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8]))
+
+    m_const = np.ones_like(x) * (0.063) * constants.m_e #+ 0.083*0.2) * constants.m_e
+    m_change = np.ones_like(x) * (0.063 + 0.083*0.2)
+    m_change[x >= 10e-9] = 0.063
+    m_change[x >= 20e-9] = (0.063 + 0.083*0.2)
+    m_change *= constants.m_e
+
+    eigval_const, eigvect_const = solve_schrodinger(x, V, m_const)
+    eigval_change, eigvect_change = solve_schrodinger(x, V, m_change)
+
+    plt.figure()
+    plt.plot(x/1e-9, V/constants.eV, 'k')
+    plt.plot(x / 1e-9, (eigvect_const[:, 0] + eigval_const[0] / constants.eV),
+             label='const mass')
+    plt.plot(x / 1e-9, (eigvect_const[:, 1] + eigval_const[1] / constants.eV))
+    plt.plot(x / 1e-9, (eigvect_const[:, 2] + eigval_const[2] / constants.eV))
+    plt.gca().set_prop_cycle(None)
+    plt.plot(x / 1e-9, eigvect_change[:, 0] + eigval_change[0] /
+             constants.eV,
+             '--', label='changing mass')
+    plt.plot(x / 1e-9, eigvect_change[:, 1] + eigval_change[1] /
+             constants.eV, '--')
+    plt.plot(x / 1e-9, eigvect_change[:, 2] + eigval_change[2] /
+             constants.eV, '--')
+
+    plt.legend(loc=1)
+
+    plt.xlabel('z (nm)')
+    plt.ylabel('E (eV)')
+    # plt.show()
+
+    for i in range(4):
+        top = np.trapz(eigvect_const[:, i]*eigvect_change[:, i], x)
+        bottom = np.trapz(eigvect_const[:, i]**2, x)
+        print(f'Integral overlap {i+1} = {top/bottom:.3g}')
+
+    print('\nConst\tChange\tdE  \tchange/const')
+    for i in range(3):
+        print(f'{eigval_const[i]/constants.eV:.3f}\t'
+              f'{eigval_change[i+1]/constants.eV:.3f}\t'
+              f'{abs(eigval_const[i] - eigval_change[i+1])/constants.eV:.3f}\t'
+              f'{eigval_change[i+1]/eigval_const[i]:.3f}')
 
     """Big discontinuities test"""
     # import materials
@@ -561,10 +498,34 @@ if __name__ == '__main__':
     #     analytic[i] = E_n(i+1, L)
     # analytic /= (constants.eV * 1e-3)
     #
-    # x = np.linspace(0, L, 1000)
-    # V = np.zeros_like(x)
-    # m = np.ones_like(x) * constants.m_e
-    # evals, evects = solve_schrodinger(x, V, m)
+    # N = np.linspace(10, 4000, 100, dtype=int)
+    # t = np.zeros(len(N))
+    # state1 = np.zeros(len(N))
+    # for i in range(len(N)):
+    #     omega = np.sqrt(1 / constants.m_e)
+    #     x = np.linspace(-3e-9, 3e-9, N[i])
+    #     V = 0.5 * omega**2 * constants.m_e * x**2
+    #     m = np.ones_like(x) * constants.m_e
+    #     time_start = time.time()
+    #     evals, evects = solve_schrodinger(x, V, m)
+    #     time_end = time.time()
+    #     t[i] = time_end - time_start
+    #     state1[i] = evals[0]
+    #     print(i)
+    #
+    # plt.figure('t vs N')
+    # plt.plot(N, t)
+    # plt.xlabel('N points')
+    # plt.ylabel('time to calculate (s)')
+    # plt.grid()
+    #
+    # np.savetxt('./../../Code for Graphs/MatrixParabolaState1.csv',
+    #            state1, delimiter=',')
+    # np.savetxt('./../../Code for Graphs/MatrixParabolaTime.csv', t,
+    #            delimiter=',')
+    # np.savetxt('./../../Code for Graphs/MatrixParabolaN.csv', N,
+    #            delimiter=',')
+    #
     # evals /= (constants.eV * 1e-3)
     #
     # print(f'Anal\tMatr\tdE')
@@ -573,40 +534,178 @@ if __name__ == '__main__':
     #           f'{abs(analytic[i] - evals[i]):.3f}')
     #
     # plt.figure()
-    # plt.plot(x, V, 'k')
+    # plt.plot(x/1e-9, V, 'k')
+    # plt.plot([0, 0], [0, 100], 'k')
+    # plt.plot([10, 10], [0, 100], 'k')
     # for i in range(5):
-    #     plt.plot(x, evects[:,i]*1.2e2 + evals[i])
+    #     plt.plot(x/1e-9, evects[:,i]*1.2e2 + evals[i],
+    #              label=f'E = {evals[i]:.2f} meV')
 
     """Parabolic Well"""
-    def E_n(n, omega):
-        return (n+0.5) * constants.hbar * omega
+    # def E_n(n, omega):
+    #     return (n+0.5) * constants.hbar * omega
+    #
+    # omega = np.sqrt(1 / constants.m_e)
+    #
+    # analytic = np.zeros(5)
+    # for i in range(5):
+    #     analytic[i] = E_n(i, omega)
+    # analytic /= constants.eV
+    #
+    # x = np.linspace(0, 10e-9, 1000)
+    # # V = 0.5 * omega**2 * constants.m_e * (x-max(x)/2)**2
+    # V = np.zeros_like(x)
+    # m = np.ones_like(x) * constants.m_e
+    # t = np.zeros(10)
+    # for i in range(len(t)):
+    #     time_start = time.time()
+    #     evals, evects = solve_schrodinger(x, V, m)
+    #     time_end = time.time()
+    #     t[i] = time_end - time_start
+    #
+    # evals /= constants.eV
+    #
+    # print(f'mean time: {np.mean(t):.3e}')
+    # print(f'std time: {np.std(t):.3e}')
+    #
+    # print('\n')
+    # print(f'Anal\tMatr\tdE')
+    # for i in range(5):
+    #     print(f'{analytic[i]:.3f}\t{evals[i]:.3e}\t'
+    #           f'{(analytic[i] - evals[i])*1000:.3e}')
+    #
+    # plt.figure()
+    #
+    # plt.plot(x[V<3.5*constants.eV]/1e-9,
+    #          V[V<3.5*constants.eV]/constants.eV, 'k')
+    # for i in range(5):
+    #     plt.plot(x/1e-9, evects[:,i] + evals[i],
+    #              label=f'E = {evals[i]:.2f} meV')
+    #
+    # plt.legend(loc=1)
+    # plt.grid()
+    # plt.xlabel('z (nm)')
+    # plt.ylabel('E (meV)')
 
-    omega = np.sqrt(1 / constants.m_e)
+    # print('\n\n')
+    #
+    # x = np.linspace(-1e-8, 1e-8, 1000)
+    # V = np.ones_like(x) * 1.6e-19 * 200e-3
+    # V[abs(x) < 6e-9] = 0
+    # V[abs(x) < 2e-9] = 1.6e-19 * 100e-3
+    #
+    # eigval, eigvect = solve_schrodinger(x, V)
+    #
+    #
+    # x = np.linspace(0, 1e-8, 1000)
+    # V = np.zeros_like(x)
+    # evals, evects = solve_schrodinger(x, V)
+    #
+    # def analytic(n, x):
+    #     global evects
+    #
+    #     wavefunc = np.sin(n * np.pi * x / 10e-9)
+    #     if n == 1:
+    #         wavefunc *= (max(evects[:, n - 1]) - min(evects[:,n - 1]))
+    #     else:
+    #         wavefunc *= (max(evects[:, n - 1]) - min(evects[:,
+    #                                                  n -1])) * 0.5
+    #
+    #     return wavefunc
+    #
+    # plt.figure()
+    # overlap = np.zeros(5)
+    # for i in range(5):
+    #     anal = analytic(i + 1, x)
+    #     plt.plot(x, anal)
+    #     plt.plot(x, evects[:,i], '--')
+    #     top = np.trapz(evects[:,i] * anal, x)
+    #     bottom = np.trapz(evects[:,i]**2, x)
+    #     overlap[i] = top / bottom
+    #     print(f'Overlap[{i}] = {overlap[i]:.3f}')
 
-    analytic = np.zeros(5)
-    for i in range(5):
-        analytic[i] = E_n(i, omega)
-    analytic /= constants.eV
 
-    x = np.linspace(0, 3e-9, 1000)
-    V = 0.5 * omega**2 * constants.m_e * (x-max(x)/2)**2
-    m = np.ones_like(x) * constants.m_e
-    evals, evects = solve_schrodinger(x, V, m)
-    evals /= constants.eV
+    """Constant mass changes E depending on with mass used"""
+    import materials
+    from anderson import anderson
 
-    print(f'Anal\tMatr\tdE')
-    for i in range(5):
-        print(f'{analytic[i]:.3f}\t{evals[i]:.3f}\t'
-              f'{(analytic[i] - evals[i])*1000:.3f}')
+    x = np.linspace(0, 30e-9, 1000)
+    mat = [materials.AlGaAs(0.5, 10), materials.GaAs(10),
+           materials.AlGaAs(0.5, 10)]
+    V = anderson(x, mat, np.array([1e-8, 1e-8, 1e-8]))
+    m_big = np.ones_like(x) * materials.AlGaAs(0.5, 10).me * \
+            constants.m_e
+    m_small = np.ones_like(x) * materials.GaAs(10).me * constants.m_e
+    m_PDMSE = np.ones_like(x) * materials.GaAs(10).me * constants.m_e
+    m_PDMSE[x<1e-8] = materials.AlGaAs(0.5, 10).me * constants.m_e
+    m_PDMSE[x>2e-8] = materials.AlGaAs(0.5, 10).me * constants.m_e
+
+    eval_big, evect_big = solve_schrodinger(x, V, m_big)
+    eval_small, evect_small = solve_schrodinger(x, V, m_small)
+    eval_PDMSE, evect_PDMSE = solve_schrodinger(x, V, m_PDMSE)
 
     plt.figure()
+    plt.plot(x/1e-9, V/constants.eV, 'k')
+    plt.plot(x/1e-9, evect_big[:,0] + eval_big[0]/constants.eV,
+             label='AlGaAs mass')
+    plt.plot(x / 1e-9, evect_big[:, 1] + eval_big[1] / constants.eV)
+    plt.plot(x / 1e-9, evect_big[:, 2] + eval_big[2] / constants.eV)
+    plt.plot(x / 1e-9, evect_big[:, 3] + eval_big[3] / constants.eV)
+    plt.gca().set_prop_cycle(None)
 
-    plt.plot(x[V<3.5*constants.eV]/1e-9,
-             V[V<3.5*constants.eV]/constants.eV, 'k')
-    for i in range(5):
-        plt.plot(x/1e-9, evects[:,i] + evals[i])
+    plt.plot(x/1e-9, evect_small[:,0] + eval_small[0]/constants.eV,
+             '--', label='GaAs mass')
+    plt.plot(x/1e-9, evect_small[:,1] + eval_small[1]/constants.eV,
+             '--')
+    plt.plot(x/1e-9, evect_small[:,2] + eval_small[2]/constants.eV,
+             '--')
+    plt.plot(x / 1e-9, evect_small[:, 3] + eval_small[3] / constants.eV,
+             '--')
+    plt.gca().set_prop_cycle(None)
 
-    plt.grid()
-    plt.xlabel('x (nm)')
+    plt.plot(x / 1e-9, evect_PDMSE[:, 0] + eval_PDMSE[0] / constants.eV,
+             ':', label='Varying mass')
+    plt.plot(x / 1e-9, evect_PDMSE[:, 1] + eval_PDMSE[1] / constants.eV,
+             ':')
+    plt.plot(x / 1e-9, evect_PDMSE[:, 2] + eval_PDMSE[2] / constants.eV,
+             ':')
+    plt.plot(x / 1e-9, evect_PDMSE[:, 3] + eval_PDMSE[3] / constants.eV,
+             ':')
+
+    plt.xlabel('z (nm)')
     plt.ylabel('E (eV)')
+    plt.legend()
+    plt.grid()
+
+    print('\n\n')
+
+    eval_big /= constants.eV
+    eval_small /= constants.eV
+    eval_PDMSE /= constants.eV
+    print('AlGaAs \t GaAs \t True')
+    for i in range(5):
+        print(f'{eval_big[i]:.3f} \t {eval_small[i]:.3f} \t '
+              f'{eval_PDMSE[i]:.3f} \t '
+              f'{eval_PDMSE[i] - eval_small[i]:.3f} \t '
+              f'{eval_PDMSE[i] - eval_big[i]:.3f}')
+
+
+    print('\n')
+    print('Big \t Small')
+    big_overlap = np.zeros(4)
+    small_overlap = np.zeros(4)
+
+    for i in range(4):
+        top_big = np.trapz((evect_big[:, i] + eval_big[i]) *
+                           (evect_PDMSE[:, i] + eval_PDMSE[i]), x)
+        top_small = np.trapz((evect_small[:, i] + eval_small[i]) *
+                           (evect_PDMSE[:, i] + eval_PDMSE[i]), x)
+        bottom = np.trapz((evect_PDMSE[:, i] + eval_PDMSE[i])**2, x)
+
+        big_overlap[i] = top_big / bottom
+        small_overlap[i] = top_small / bottom
+
+
+        print(f'{big_overlap[i]:.3f} \t {small_overlap[i]:.3f}')
+
     plt.show()
