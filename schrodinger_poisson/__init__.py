@@ -10,5 +10,5 @@ from poisson import solve_poisson
 from diffusion import solve_diffusion
 from schrodinger_poisson import *
 from materials import materials
-from anderson import anderson
+from anderson import *
 from strain import strain
