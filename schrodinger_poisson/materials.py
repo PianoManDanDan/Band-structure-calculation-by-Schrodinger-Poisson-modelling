@@ -167,7 +167,7 @@ class AlAs:
         self.dielectric_constant = 12.9 - 2.84
         self.mlh = 0.082 + 0.068
         self.mhh = 0.51 + 0.25
-        self.m_e = 0.063 + 0.083*0.45
+        self.me = 0.063 + 0.083*0.45
         self.Eg = 1.9 + 0.125 + 0.143
         self.lattice_constant = 5.6533 + 0.0078
 
